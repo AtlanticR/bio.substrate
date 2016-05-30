@@ -1,0 +1,15 @@
+Package: ecomod_substrate
+Title: Package that interacts with ecomod and associated projects to ... 
+Version: 0.1
+Authors@R: c( person("Jae", "Choi", email="jae.choi@dfo-mpo.gc.ca", role=c("aut", "cre")) ) 
+Description: This project interacts with the functionality of ecomod 
+    to provide an interface to substrate data ...
+Depends: R (>= 3.0.0)
+Imports: devtools, ecomod_base
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+License: MIT
+LazyData: true
+URL: https://github.com/jae0/ecomod_substrate/
+
+
