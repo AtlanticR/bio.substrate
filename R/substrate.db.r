@@ -52,7 +52,7 @@
       ### This uses GMT-based methods .. it is now deprecated
 
       p = list()
-      p$init.files = 	loadfunctions( c("spacetime", "utility", "substrate", "bathymetry", "polygons" ) )
+      p$init.files = 	ecomodLibrary( c("ecomod_spacetime", "ecomod_utilities", "ecomod_substrate", "ecomod_bathymetry", "ecomod_polygons" ) )
       p$libs = RLibrary( "maptools" , "rgdal" )
 
       # --------------------------------------
