@@ -1,6 +1,6 @@
 # bio.substrate
 
-Package to help develop and/or use ecomod tools in order to interact with substrate size data ...
+Package to help develop and/or use bio tools in order to interact with substrate size data ...
 
 Installation:
 

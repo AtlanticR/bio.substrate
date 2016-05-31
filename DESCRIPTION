@@ -1,8 +1,8 @@
 Package: bio.substrate
-Title: Package that interacts with ecomod and associated projects to ... 
+Title: Package that interacts with bio and associated projects to ... 
 Version: 0.1
 Authors@R: c( person("Jae", "Choi", email="choijaeseok@gmail.com", role=c("aut", "cre")) ) 
-Description: This project interacts with the functionality of ecomod 
+Description: This project interacts with the functionality of bio 
     to provide an interface to substrate data ...
 Depends: R (>= 3.0.0)
 Imports: 
@@ -10,9 +10,7 @@ Imports:
   bio.base,
   bio.bathymetry, 
   bio.coastline,
-  bio.parallel, 
   bio.polygons,
-  bio.spacetime, 
   bio.utilities 
 Suggests: knitr, rmarkdown
   lattice, 
@@ -31,7 +29,8 @@ Suggests: knitr, rmarkdown
   colorspace, 
   splancs, 
   fields,
-  bigmemory.sri, synchronicity, bigmemory, biganalytics, bigtabulate, bigalgebra 
+  bigmemory.sri, synchronicity, bigmemory, biganalytics, bigtabulate, bigalgebra,
+  bio.spacetime 
 VignetteBuilder: knitr
 License: MIT
 LazyData: true

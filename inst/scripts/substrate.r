@@ -10,10 +10,11 @@
   p = list( project.name = "substrate" )
   p$project.root = project.datadirectory( p$project.name )
 
-  p$libs = ecomodLibrary( "bio.spacetime", "bio.utilities", "bio.parallel", "bio.bathymetry", "bio.polygons",
-                                "bio.substrate", "bio.coastline" )
+  p$libs = bioLibrary( "bio.spacetime", "bio.utilities",  "bio.bathymetry", "bio.polygons",
+      "bio.substrate", "bio.coastline" )
 
-  p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA", "geosphere", "geoR", "gstat", "spBayes",
+  p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA",
+                     "geosphere", "geoR", "gstat", "spBayes",
                      "sp", "raster", "colorspace" ,  "splancs", "fields",
                      "bigmemory.sri", "synchronicity", "bigmemory", "biganalytics", "bigtabulate", "bigalgebra" ) )
 

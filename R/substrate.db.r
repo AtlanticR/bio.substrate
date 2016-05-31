@@ -52,7 +52,7 @@
       ### This uses GMT-based methods .. it is now deprecated
 
       p = list()
-      p$libs = ecomodLibrary( "bio.spacetime", "bio.utilities", "bio.substrate", "bio.bathymetry", "bio.polygons" )
+      p$libs = bioLibrary( "bio.spacetime", "bio.utilities", "bio.substrate", "bio.bathymetry", "bio.polygons" )
       p$libs = c(p$libs, RLibrary( "maptools" , "rgdal" ) )
 
       # --------------------------------------

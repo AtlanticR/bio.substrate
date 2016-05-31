@@ -1,7 +1,7 @@
 
 substrate.figures = function( DS=NULL, p=NULL ) {
 
-  ecomodLibrary( "bio.coastline" )
+  bioLibrary( "bio.coastline" )
 
   if ( DS=="predictions" ) {
     p = spacetime.db( p=p, DS="bigmemory.filenames" )
