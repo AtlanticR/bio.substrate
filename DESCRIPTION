@@ -12,7 +12,9 @@ Imports:
   bio.coastline,
   bio.polygons,
   bio.utilities 
-Suggests: knitr, rmarkdown
+Suggests: 
+  knitr, 
+  rmarkdown,
   lattice, 
   parallel, 
   INLA, 
