@@ -1,19 +1,19 @@
-Package: ecomod_substrate
+Package: bio.substrate
 Title: Package that interacts with ecomod and associated projects to ... 
 Version: 0.1
-Authors@R: c( person("Jae", "Choi", email="jae.choi@dfo-mpo.gc.ca", role=c("aut", "cre")) ) 
+Authors@R: c( person("Jae", "Choi", email="choijaeseok@gmail.com", role=c("aut", "cre")) ) 
 Description: This project interacts with the functionality of ecomod 
     to provide an interface to substrate data ...
 Depends: R (>= 3.0.0)
 Imports: 
   devtools,
-  ecomod_base,
-  ecomod_bathymetry, 
-  ecomod_coastline,
-  ecomod_parallel, 
-  ecomod_polygons,
-  ecomod_spacetime, 
-  ecomod_utilities 
+  bio.base,
+  bio.bathymetry, 
+  bio.coastline,
+  bio.parallel, 
+  bio.polygons,
+  bio.spacetime, 
+  bio.utilities 
 Suggests: knitr, rmarkdown
   lattice, 
   parallel, 
@@ -35,6 +35,6 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: MIT
 LazyData: true
-URL: https://github.com/jae0/ecomod_substrate/
+URL: https://github.com/Beothuk/bio.substrate/
 
 

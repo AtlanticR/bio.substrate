@@ -1,4 +1,4 @@
-# ecomod_template
+# bio.template
 
 Package to help develop and/or use ecomod tools in order to ...
 

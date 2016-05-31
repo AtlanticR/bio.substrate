@@ -10,12 +10,13 @@
   p = list( project.name = "substrate" )
   p$project.root = project.datadirectory( p$project.name )
 
-  p$init.files = ecomodLibrary( "ecomod_spacetime", "ecomod_utilities", "ecomod_parallel", "ecomod_bathymetry", "ecomod_polygons",
-                                "ecomod_substrate", "ecomod_coastline" )
+  p$libs = ecomodLibrary( "bio.spacetime", "bio.utilities", "bio.parallel", "bio.bathymetry", "bio.polygons",
+                                "bio.substrate", "bio.coastline" )
 
-  p$libs = RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA", "geosphere", "geoR", "gstat", "spBayes",
+  p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA", "geosphere", "geoR", "gstat", "spBayes",
                      "sp", "raster", "colorspace" ,  "splancs", "fields",
-                     "bigmemory.sri", "synchronicity", "bigmemory", "biganalytics", "bigtabulate", "bigalgebra" )
+                     "bigmemory.sri", "synchronicity", "bigmemory", "biganalytics", "bigtabulate", "bigalgebra" ) )
+
   p = spatial.parameters( type="canada.east.highres", p=p ) # highest resolution still
 
   p = spacetime.parameters(p)  # load defaults

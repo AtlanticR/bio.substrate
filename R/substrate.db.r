@@ -11,8 +11,8 @@
       # Scotian shelf gridded grain size (mm).
       # NAD83 UTM zone 20 (I think)
 
-      rawdata.file = file.path( project.datadirectory("ecomod_substrate"), "data", "grainsize.txt" )
-      filename = file.path( project.datadirectory("ecomod_substrate"), "data", "substrate.asciigrid.rdata" )
+      rawdata.file = file.path( project.datadirectory("bio.substrate"), "data", "grainsize.txt" )
+      filename = file.path( project.datadirectory("bio.substrate"), "data", "substrate.asciigrid.rdata" )
 
       if (DS =="substrate.initial" ) {
         load( filename )
@@ -26,7 +26,7 @@
 
     # lon - lat converted
     if (  DS %in% c("lonlat.highres", "lonlat.highres.redo") ) {
-      filename = file.path( project.datadirectory("ecomod_substrate"), "data", "substrate.lonlat.highres.rdata" )
+      filename = file.path( project.datadirectory("bio.substrate"), "data", "substrate.lonlat.highres.rdata" )
       if (DS =="lonlat.highres" ) {
         load( filename)
         return( substrate)
@@ -52,8 +52,8 @@
       ### This uses GMT-based methods .. it is now deprecated
 
       p = list()
-      p$init.files = 	ecomodLibrary( c("ecomod_spacetime", "ecomod_utilities", "ecomod_substrate", "ecomod_bathymetry", "ecomod_polygons" ) )
-      p$libs = RLibrary( "maptools" , "rgdal" )
+      p$libs = ecomodLibrary( "bio.spacetime", "bio.utilities", "bio.substrate", "bio.bathymetry", "bio.polygons" )
+      p$libs = c(p$libs, RLibrary( "maptools" , "rgdal" ) )
 
       # --------------------------------------
       # create the main database
@@ -94,7 +94,7 @@
       outfn = "substrate.grainsize"
       annot = "ln ( Grain size; mm )"
       map( xyz=substrate[inside,datacols], cfa.regions=F, depthcontours=T, pts=NULL, annot=annot,
-        fn=outfn, loc=file.path( project.datadirectory("ecomod_substrate"), "R"), at=datarange , col.regions=cols )
+        fn=outfn, loc=file.path( project.datadirectory("bio.substrate"), "R"), at=datarange , col.regions=cols )
 
     }
 
@@ -105,7 +105,7 @@
     if ( DS %in% c("lonlat.interpolated", "lonlat.interpolated.redo") ) {
       # interpolation to internal grid
       # locally (internally) force the highest possible resolution to not lose data and extrapolate safely
-      filename.lonlat.interp = file.path( project.datadirectory("ecomod_substrate"), "data",
+      filename.lonlat.interp = file.path( project.datadirectory("bio.substrate"), "data",
 					paste( p$spatial.domain, "substrate.lonlat.interpolated.rdata", sep=".")  )
       if (DS =="lonlat.interpolated" ) {
         load (filename.lonlat.interp )
@@ -135,9 +135,9 @@
     if ( DS %in% c("lonlat", "lonlat.redo", "lonlat.grid") ) {
       # interpolation to internal grid
       # locally (internally) force the highest possible resolution to not lose data
-      filename.lonlat = file.path( project.datadirectory("ecomod_substrate"), "data",
+      filename.lonlat = file.path( project.datadirectory("bio.substrate"), "data",
 					paste( p$spatial.domain, "substrate.lonlat.rdata", sep=".") )
-      filename.lonlat.grid = file.path( project.datadirectory("ecomod_substrate"), "data",
+      filename.lonlat.grid = file.path( project.datadirectory("bio.substrate"), "data",
 					paste( p$spatial.domain, "substrate.lonlat.grid.rdata", sep=".") )
 
       if (DS =="lonlat.grid" ) {
@@ -170,8 +170,8 @@
     if ( DS %in% c("planar", "planar.redo", "planar.grid") ) {
       # Re-grid data to be internally consistent with the snowcrab coordinate system
       # WGS84 ellipsoid and not NAD83 ...
-      filename.planar = file.path( project.datadirectory("ecomod_substrate"), "data", paste( p$spatial.domain, "substrate.planar.rdata", sep=".") )
-      filename.planar.grid = file.path( project.datadirectory("ecomod_substrate"), "data", paste( p$spatial.domain, "substrate.planar.grid.rdata", sep=".") )
+      filename.planar = file.path( project.datadirectory("bio.substrate"), "data", paste( p$spatial.domain, "substrate.planar.rdata", sep=".") )
+      filename.planar.grid = file.path( project.datadirectory("bio.substrate"), "data", paste( p$spatial.domain, "substrate.planar.grid.rdata", sep=".") )
 
       if (DS =="planar.grid" ) {
         load( filename.planar.grid )
@@ -203,7 +203,7 @@
 
     if (DS %in% c("substrate.spacetime.inputs.data.redo", "substrate.spacetime.inputs.data") ) {
 
-      datadir = project.datadirectory("ecomod_substrate", "data" )
+      datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
       fn = file.path( datadir, paste( "substrate", "spacetime", p$spatial.domain, "rdata", sep=".") )
 
@@ -229,7 +229,7 @@
 
     if (DS %in% c("substrate.spacetime.inputs.prediction.redo", "substrate.spacetime.inputs.prediction") ) {
 
-      datadir = project.datadirectory("ecomod_substrate", "data" )
+      datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
       fn = file.path( datadir, paste( "substrate", "spacetime", p$spatial.domain, "rdata", sep=".") )
 
@@ -252,7 +252,7 @@
     if ( DS %in% c("substrate.spacetime.finalize.redo", "substrate.spacetime.finalize" )) {
       #// substrate( p, DS="substrate.spacetime.finalize(.redo)" return/create the
       #//   spacetime interpolated method formatted and finalised for production use with predictions and statistics
-      fn = file.path(  project.datadirectory("ecomod_substrate"), "interpolated",
+      fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
         paste( "substrate", "spacetime", "finalized", p$spatial.domain, "rdata", sep=".") )
       if (DS =="substrate.spacetime.finalize" ) {
         B = NULL
@@ -472,7 +472,7 @@
             if( length( p$grids.new )== 1 ) {
               domain = p$grids.new
         } } }
-        fn = file.path( project.datadirectory("ecomod_substrate", "interpolated"),
+        fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", domain, "rdata", sep=".") )
         if ( file.exists ( fn) ) load( fn)
         if ( return.format == "dataframe" ) { ## default
@@ -504,7 +504,7 @@
             from =rasterize( Z0, spatial.parameters.to.raster(p0), field=vn, fun=mean),
             to   =spatial.parameters.to.raster( p1) )
         }
-        fn = file.path( project.datadirectory("ecomod_substrate", "interpolated"),
+        fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
         save (Z, file=fn, compress=TRUE)
         print(fn)
