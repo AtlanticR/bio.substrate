@@ -7,7 +7,7 @@
   ##        .. might change this in future as it is also expensive in time .. but really only done once in a while, sooo...
   ## TODO:: add data collected by snow crab survey and any others for that matter
 
-  p = list( project.name = "substrate" )
+  p = list( project.name = "bio.substrate" )
   p$project.root = project.datadirectory( p$project.name )
 
   p$libs = bioLibrary( "bio.spacetime", "bio.utilities",  "bio.bathymetry", "bio.polygons",

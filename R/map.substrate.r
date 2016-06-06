@@ -18,7 +18,7 @@
     X = substrate * M.SS
 
     image(log(X))
-    Pr( "png", file.path(project.datadirectory("substrate"), "R"), "substrate" )
+    Pr( "png", file.path(project.datadirectory("bio.substrate"), "R"), "substrate" )
 
     return (NULL)
   }
