@@ -2,10 +2,10 @@
   map.substrate = function( params=NULL ) {
 
     substrate = substrate.db( p, DS="lonlat.grid")
-          
+
     M.SS = subselect.xy2grid (area="cfaall", DS="file", loc="grids", fname="mask.cfa")
     # screen out the Bay of Fundy (4X) area
-    M.4X = get.boxes ( area="4X", DS="file", fname=file.path(project.datadirectory("snowcrab"), "snowcrab", "R", "grids", "mask.4X.rdata" ) )
+    M.4X = get.boxes ( area="4X", DS="file", fname=file.path(project.datadirectory("bio.snowcrab"), "R", "grids", "mask.4X.rdata" ) )
     M.SS = M.SS * M.4X
     rm(M.4X)
 
@@ -18,7 +18,7 @@
     X = substrate * M.SS
 
     image(log(X))
-    Pr( "png", file.path(project.datadirectory("substrate"), "R"), "substrate" ) 
+    Pr( "png", file.path(project.datadirectory("substrate"), "R"), "substrate" )
 
     return (NULL)
   }
