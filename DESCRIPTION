@@ -31,7 +31,7 @@ Suggests:
   colorspace, 
   splancs, 
   fields,
-  bigmemory.sri, synchronicity, bigmemory, biganalytics, bigtabulate, bigalgebra,
+  bigmemory,
   bio.spacetime 
 VignetteBuilder: knitr
 License: MIT

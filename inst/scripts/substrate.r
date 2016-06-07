@@ -15,8 +15,7 @@
 
   p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA",
                      "geosphere", "geoR", "gstat", "spBayes",
-                     "sp", "raster", "colorspace" ,  "splancs", "fields",
-                     "bigmemory.sri", "synchronicity", "bigmemory", "biganalytics", "bigtabulate", "bigalgebra" ) )
+                     "sp", "raster", "colorspace" ,  "splancs", "fields", "bigmemory" ) )
 
   p = spatial.parameters( type="canada.east.highres", p=p ) # highest resolution still
 
