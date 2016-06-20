@@ -7,28 +7,9 @@
   ##        .. might change this in future as it is also expensive in time .. but really only done once in a while, sooo...
   ## TODO:: add data collected by snow crab survey and any others for that matter
 
-  p = list( project.name = "bio.substrate" )
-  p$project.root = project.datadirectory( p$project.name )
+  p = bio.substrate::substrate.parameters( DS="bio.substrate", nc=1 )
 
-  p$libs = bioLibrary( "bio.spacetime", "bio.utilities",  "bio.bathymetry", "bio.polygons",
-      "bio.substrate", "bio.coastline" )
-
-  p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA",
-                     "geosphere", "geoR", "gstat", "spBayes",
-                     "sp", "raster", "colorspace" ,  "splancs", "fields", "bigmemory" ) )
-
-  p = spatial.parameters( type="canada.east.highres", p=p ) # highest resolution still
-
-  p = spacetime.parameters(p)  # load defaults
-
-  p$substrate.bigmemory.reset = FALSE
-
-  # cluster definition
-  nc = 1
-  # nc = 5
-  p$clusters = rep( "localhost", nc )
-  # p$clusters = c( rep( "nyx", nc ), rep ("tartarus", nc), rep("kaos", nc ) )
-
+  # nc=5; p$clusters = c( rep( "nyx", nc ), rep ("tartarus", nc), rep("kaos", nc ) )
 
 
   ### -----------------------------------------------------------------
