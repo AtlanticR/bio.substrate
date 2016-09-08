@@ -13,37 +13,41 @@
 
 
   ### -----------------------------------------------------------------
-  make.substrate.db = FALSE
-  if (make.substrate.db) {
+
     substrate.db ( DS="substrate.initial.redo" ) # bring in Kostelev's data ... stored as a SpatialGridDataFrame
 		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here ...
-  }
 
-  ### -----------------------------------------------------------------
-  spatial.covariance.redo = FALSE
-  if (spatial covariance.redo) {
-    p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) )
-    # p$substrate.bigmemory.reset = TRUE  # reset needed if variables entering are changing (eg., addiing covariates with interpolation, etc)
-    substrate.db( p=p, DS="covariance.spatial.redo" )
-  }
-  covSp = substrate.db( p=p, DS="covariance.spatial" )
+    substrate.db( p=p, DS="substrate.spacetime.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
+    substrate.db( p=p, DS="substrate.spacetime.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
 
 
   ### -----------------------------------------------------------------
-  spatial.interpolation.redo = FALSE
-  if (spatial.interpolation.redo) {
-    # do not use all CPU's as INLA itself is partially run in parallel
-    # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
-    p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
-    # p$substrate.bigmemory.reset = TRUE   # reset needed if variables entering are changing (eg., addiing covariates with interpolation, etc)
-    substrate.db( p=p, DS="spde.redo" )
-    # to see the raw saved versions of the the results:
-    # predSp = spacetime.db( p=p, DS="predictions.redo" )
-    # statSp = spacetime.db( p=p, DS="statistics.redo" )
-    # to see the assimilated data:
-    # B = substrate.db( p=p, DS="substrate.spacetime.finalize" )
-  }
+  
+  p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) ) 
+  p = spacetime( method="covariance.spatial",
+    DATA=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ), 
+    OUT=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction"), 
+    p=p, overwrite=TRUE )
 
+      # to see the raw saved versions of the the results:
+      covSp = spacetime( p=p, DS="covariance.spatial" ) # load saved data
+
+
+  ### -----------------------------------------------------------------
+  # do not use all CPU's as INLA itself is partially run in parallel
+  # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
+  p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
+
+  p = spacetime( method="inla.interpolations",
+    DATA=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ), 
+    OUT=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction"), 
+    p=p, overwrite=TRUE )
+
+      # to see the raw saved versions of the the results:
+      predSp = spacetime( p=p, DS="inla.predictions" )
+      statSp = spacetime( p=p, DS="inla.statistics" )
+   
+  B = substrate.db( p=p, DS="substrate.spacetime.finalize" )
 
   ### -----------------------------------------------------------------
   # as the interpolation process is so expensive, regrid based off the above run
