@@ -13,11 +13,11 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
         "bio.substrate", "bio.coastline" )
     p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA",
                        "geosphere", "geoR", "gstat", "spBayes",
-                       "sp", "raster", "colorspace" ,  "splancs", "fields", "bigmemory" ) )
+                       "sp", "raster", "colorspace" ,  "splancs", "fields", "h5" ) )
 
     p = spatial.parameters( type=resolution, p=p ) # highest resolution still
     p = spacetime.parameters(p)  # load defaults
-    p$substrate.bigmemory.reset = FALSE
+    p$substrate.hdf5.reset = FALSE
 
     # cluster definition
     p$clusters = rep( "localhost", nc )
@@ -37,10 +37,9 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$downsampling = c( 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.2 ) # local block search fractions  -- need to adjust based upon data density
     p$mesh.boundary.resolution = 120 # discretization
     p$mesh.boundary.convex = -0.03  # curavature of boundary
-    p$sbbox = spacetime.db( p=p, DS="statistics.box" ) # bounding box and resoltuoin of output statistics defaults to 1 km X 1 km
 
     # p$variables = list( Y="substrate", X=c("z", "dZ", "ddZ", "Z.rangeMode" ), LOCS=c("plon", "plat") )
-    p$variables = list( Y="substrate", X=c("z", "dZ" ), LOCS=c("plon", "plat") )
+    p$variables = list( Y="substrate", COV=c("z", "dZ" ), LOCS=c("plon", "plat") )
     p$spacetime.link = function( X ) { log(X ) }  ## data range is from -100 to 5467 m .. 1000 shifts all to positive valued by one -order of magnitude
     p$spacetime.invlink = function( X ) { exp(X) }
     p$dist.max = 100 # length scale (km) of local analysis .. for acceptance into the local analysis/model
@@ -61,6 +60,10 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$spacetime.outputs = c( "predictions.projected", "statistics" ) # "random.field", etc.
     p$statsvars = c("range", "range.sd", "spatial.error", "observation.error")
     # if not in one go, then the value must be reconstructed from the correct elements:
+    p$sbbox = spacetime.db( p=p, DS="statistics.box" ) # bounding box and resoltuoin of output statistics defaults to 1 km X 1 km
+    p$spacetime.stats.boundary.redo = FALSE ## estimate boundart of data to speed up stats collection? Do not need to redo if bounds have already been determined
+    p$nPreds = p$nplons * p$nplats
+ 
     p$spacetime.posterior.extract = function(s, rnm) {
       # rnm are the rownames that will contain info about the indices ..
       # optimally the grep search should only be done once but doing so would
