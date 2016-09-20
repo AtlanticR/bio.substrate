@@ -13,11 +13,10 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
         "bio.substrate", "bio.coastline" )
     p$libs = c( p$libs, RLibrary( "rgdal", "maps", "mapdata", "maptools", "lattice", "parallel", "INLA",
                        "geosphere", "geoR", "gstat", "spBayes",
-                       "sp", "raster", "colorspace" ,  "splancs", "fields", "h5" ) )
+                       "sp", "raster", "colorspace" ,  "splancs", "fields", "ff", "ffbase" ) )
 
     p = spatial.parameters( type=resolution, p=p ) # highest resolution still
     p = spacetime.parameters(p)  # load defaults
-    p$substrate.hdf5.reset = FALSE
 
     # cluster definition
     p$clusters = rep( "localhost", nc )
