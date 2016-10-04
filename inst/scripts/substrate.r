@@ -24,10 +24,9 @@
   ### -----------------------------------------------------------------
 
   p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) )
-  p = spacetime( method="spatial.covariance",
-    DATA=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
-    OUT=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction"),
-    p=p, overwrite=TRUE )
+  p = spacetime( method="spatial.covariance", p=p, overwrite=TRUE ,
+    DATA=list ( input=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
+                output=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction")) )
 
       # to see the raw saved versions of the the results:
       covSp = spacetime( p=p, DS="spatial.covariance" ) # load saved data
@@ -38,9 +37,9 @@
   # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
   p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
 
-  p = spacetime( method="inla.interpolations",
-    DATA=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
-    OUT=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction"),
+  p = spacetime( method="space.xy.inla",
+    DATA=list( input=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
+               output=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction") ),
     p=p, overwrite=TRUE )
 
       # to see the raw saved versions of the the results:
