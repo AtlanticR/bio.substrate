@@ -65,7 +65,7 @@
         substrate.db ( DS="substrate.initial.redo" ) # stored as a SpatialGridDataFrame
         substrate.db ( DS="lonlat.highres.redo" ) # simple conversion to lonlat
         for ( j in c( "SSE", "canada.east" ) ) {  # sse and snowcrab have same domains
-          p = spatial.parameters( type=j )
+          p = spacetime_parameters( type=j )
           substrate.db ( p, DS="lonlat.interpolated.redo" )
           substrate.db ( p, DS="lonlat.redo" )
           substrate.db ( p, DS="planar.redo" )
@@ -79,7 +79,7 @@
       # levelplot( log(grainsize) ~ lon + lat, substrate, main = "ln( grainsize; mm )", aspect="iso")
 
       # load the imported data in a data.frame format in a snow crab-consistent coordinates framework
-      p = spatial.parameters( type="SSE" )
+      p = spacetime_parameters( type="SSE" )
 
       substrate = substrate.db( p, DS="planar" ) # or lonlat to refresh, planar or planar.saved
       i = which( substrate$plon< 990 &  substrate$plon > 220  &
@@ -216,7 +216,7 @@
       substrate = bathymetry.db( p, DS="complete", return.format = "list" )
       substrate$substrate = projectRaster(
           from=raster( substrate.db( DS="substrate.initial" ) ),
-          to=spatial.parameters.to.raster( p) )
+          to=spacetime_parameters_to_raster( p) )
       substrate = as( brick(substrate), "SpatialGridDataFrame" )
 
       save (substrate, file=fn, compress=TRUE)
@@ -336,11 +336,11 @@
       grids = unique( c( p$spatial.domain, p$grids.new ))
 
       for (gr in grids ) {
-        p1 = spatial.parameters( type=gr )
+        p1 = spacetime_parameters( type=gr )
         for (vn in names(Z0)) {
           Z[[vn]] = projectRaster(
-            from =rasterize( Z0, spatial.parameters.to.raster(p0), field=vn, fun=mean),
-            to   =spatial.parameters.to.raster( p1) )
+            from =rasterize( Z0, spacetime_parameters_to_raster(p0), field=vn, fun=mean),
+            to   =spacetime_parameters_to_raster( p1) )
         }
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )

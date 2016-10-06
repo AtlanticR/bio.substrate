@@ -37,7 +37,7 @@
   # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
   p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
 
-  p = spacetime( method="space.xy.inla",
+  p = spacetime( method="xy.inla",
     DATA=list( input=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
                output=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction") ),
     p=p, overwrite=TRUE )

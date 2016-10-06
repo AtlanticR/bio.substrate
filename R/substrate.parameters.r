@@ -15,7 +15,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
                        "geosphere", "geoR", "gstat", "spBayes",
                        "sp", "raster", "colorspace" ,  "splancs", "fields", "ff", "ffbase" ) )
 
-    p = spatial.parameters( type=resolution, p=p ) # highest resolution still
+    p = spacetime_parameters( type=resolution, p=p ) # highest resolution still
     p = spacetime.parameters(p)  # load defaults
 
     # cluster definition
@@ -26,10 +26,6 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
 
 
   if (DS=="bio.substrate.local") {
-    p$rootdir = file.path( p$project.root, "spacetime" )
-    p$fn.P =  file.path( p$rootdir, paste( "spacetime", "predictions", p$spatial.domain, "rdata", sep=".") )
-    p$fn.S =  file.path( p$rootdir, paste( "spacetime", "statistics", p$spatial.domain, "rdata", sep=".") )
-    p$fn.results.covar =  file.path( p$rootdir, paste( "spatial", "covariance", p$spatial.domain, "rdata", sep=".") )
     p$variogram.engine = "gstat"  # "geoR" seg faults frequently ..
     p$dist.mwin = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
     p$upsampling = c( 1.1, 1.2, 1.5, 2 )  # local block search fractions
@@ -59,7 +55,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$spacetime.outputs = c( "predictions.projected", "statistics" ) # "random.field", etc.
     p$statsvars = c("range", "range.sd", "spatial.error", "observation.error")
     # if not in one go, then the value must be reconstructed from the correct elements:
-    p$sbbox = spacetime.db( p=p, DS="statistics.box" ) # bounding box and resoltuoin of output statistics defaults to 1 km X 1 km
+    p$sbbox = spacetime_db( p=p, DS="statistics.box" ) # bounding box and resoltuoin of output statistics defaults to 1 km X 1 km
     p$spacetime.stats.boundary.redo = FALSE ## estimate boundart of data to speed up stats collection? Do not need to redo if bounds have already been determined
     p$nPreds = p$nplons * p$nplats
  
