@@ -27,7 +27,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
 
   if (DS=="bio.substrate.local") {
     p$variogram.engine = "gstat"  # "geoR" seg faults frequently ..
-    p$dist.mwin = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
+    p$spacetime.prediction.dist.min = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
     p$upsampling = c( 1.1, 1.2, 1.5, 2 )  # local block search fractions
     p$downsampling = c( 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.2 ) # local block search fractions  -- need to adjust based upon data density
     p$mesh.boundary.resolution = 120 # discretization
@@ -45,7 +45,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$expected.range = 50 #+units=km km , with dependent var on log scale
     p$expected.sigma = 1e-1  # spatial standard deviation (partial sill) .. on log scale
     p$spatial.field.name = "spatial.field"  # name used in formula to index the spatal random field
-    p$modelformula = formula( substrate ~ -1 + intercept
+    p$spacetime_engine_modelformula = formula( substrate ~ -1 + intercept
       + f( inla.group(log(z+1000) ), model="rw2")
       + f( inla.group(log(dZ+0.01)), model="rw2")
       # + f( inla.group( log(ddZ+0.01) ), model="rw2")
