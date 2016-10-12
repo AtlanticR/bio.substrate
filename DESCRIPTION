@@ -9,7 +9,6 @@ Imports:
   devtools,
   bio.base,
   bio.bathymetry, 
-  bio.coastline,
   bio.polygons,
   bio.utilities 
 Suggests: 
@@ -32,6 +31,7 @@ Suggests:
   splancs, 
   fields,
   bigmemory,
+  bio.coastline,
   bio.spacetime 
 VignetteBuilder: knitr
 License: MIT
