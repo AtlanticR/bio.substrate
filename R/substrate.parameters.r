@@ -16,7 +16,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
                        "sp", "raster", "colorspace" ,  "splancs", "fields", "ff", "ffbase" ) )
 
     p = spacetime_parameters( type=resolution, p=p ) # highest resolution still
-    p = spacetime.parameters(p)  # load defaults
+    p = spacetime_parameters(p)  # load defaults
 
     # cluster definition
     p$clusters = rep( "localhost", nc )
@@ -56,8 +56,8 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     # p$spacetime_family = function(offset=0) {
     #   structure(list(
     #     linkfun = function(mu) mu + offset, 
-    #     linkinv = function(eta) mu - offset,
-    #     mu.eta = function(eta) NA, 
+    #     linkinv = function(eta) eta - offset,
+    #     mu.eta = function(eta) NA,  
     #     valideta = function(eta) TRUE, 
     #     name = paste0("logexp(", offset, ")") ),
     #     class = "link-glm" )
