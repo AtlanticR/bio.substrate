@@ -17,19 +17,19 @@
     substrate.db ( DS="substrate.initial.redo" ) # bring in Kostelev's data ... stored as a SpatialGridDataFrame
 		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here ...
 
-    substrate.db( p=p, DS="substrate.spacetime.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
-    substrate.db( p=p, DS="substrate.spacetime.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
+    substrate.db( p=p, DS="substrate.sthm.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
+    substrate.db( p=p, DS="substrate.sthm.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
 
 
   ### -----------------------------------------------------------------
 
   p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) )
-  p = spacetime( method="spatial.covariance", p=p, overwrite=TRUE ,
-    DATA=list ( input=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
-                output=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction")) )
+  p = sthm( method="spatial.covariance", p=p, overwrite=TRUE ,
+    DATA=list ( input=substrate.db( p=p, DS="substrate.sthm.inputs.data" ),
+                output=substrate.db( p=p, DS="substrate.sthm.inputs.prediction")) )
 
       # to see the raw saved versions of the the results:
-      covSp = spacetime( p=p, DS="spatial.covariance" ) # load saved data
+      covSp = sthm( p=p, DS="spatial.covariance" ) # load saved data
 
 
   ### -----------------------------------------------------------------
@@ -37,16 +37,16 @@
   # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
   p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
 
-  p = spacetime( method="xy.inla",
-    DATA=list( input=substrate.db( p=p, DS="substrate.spacetime.inputs.data" ),
-               output=substrate.db( p=p, DS="substrate.spacetime.inputs.prediction") ),
+  p = sthm( method="xy.inla",
+    DATA=list( input=substrate.db( p=p, DS="substrate.sthm.inputs.data" ),
+               output=substrate.db( p=p, DS="substrate.sthm.inputs.prediction") ),
     p=p, overwrite=TRUE )
 
       # to see the raw saved versions of the the results:
-      predSp = spacetime( p=p, DS="inla.predictions" )
-      statSp = spacetime( p=p, DS="inla.statistics" )
+      predSp = sthm( p=p, DS="inla.predictions" )
+      statSp = sthm( p=p, DS="inla.statistics" )
 
-  B = substrate.db( p=p, DS="substrate.spacetime.finalize" )
+  B = substrate.db( p=p, DS="substrate.sthm.finalize" )
 
   ### -----------------------------------------------------------------
   # as the interpolation process is so expensive, regrid based off the above run

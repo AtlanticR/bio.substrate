@@ -65,7 +65,7 @@
         substrate.db ( DS="substrate.initial.redo" ) # stored as a SpatialGridDataFrame
         substrate.db ( DS="lonlat.highres.redo" ) # simple conversion to lonlat
         for ( j in c( "SSE", "canada.east" ) ) {  # sse and snowcrab have same domains
-          p = spacetime_parameters( type=j )
+          p = spatial_parameters( type=j )
           substrate.db ( p, DS="lonlat.interpolated.redo" )
           substrate.db ( p, DS="lonlat.redo" )
           substrate.db ( p, DS="planar.redo" )
@@ -79,7 +79,7 @@
       # levelplot( log(grainsize) ~ lon + lat, substrate, main = "ln( grainsize; mm )", aspect="iso")
 
       # load the imported data in a data.frame format in a snow crab-consistent coordinates framework
-      p = spacetime_parameters( type="SSE" )
+      p = spatial_parameters( type="SSE" )
 
       substrate = substrate.db( p, DS="planar" ) # or lonlat to refresh, planar or planar.saved
       i = which( substrate$plon< 990 &  substrate$plon > 220  &
@@ -201,13 +201,13 @@
 
     # ---------------
 
-    if (DS %in% c("substrate.spacetime.inputs.data.redo", "substrate.spacetime.inputs.data") ) {
+    if (DS %in% c("substrate.sthm.inputs.data.redo", "substrate.sthm.inputs.data") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "spacetime", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "sthm", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.spacetime.inputs.data" ) {
+      if (DS =="substrate.sthm.inputs.data" ) {
         load( fn)
         return( substrate )
       }
@@ -216,7 +216,7 @@
       substrate = bathymetry.db( p, DS="complete", return.format = "list" )
       substrate$substrate = projectRaster(
           from=raster( substrate.db( DS="substrate.initial" ) ),
-          to=spacetime_parameters_to_raster( p) )
+          to=spatial_parameters_to_raster( p) )
       substrate = as( brick(substrate), "SpatialGridDataFrame" )
 
       save (substrate, file=fn, compress=TRUE)
@@ -227,40 +227,40 @@
     ### ------
 
 
-    if (DS %in% c("substrate.spacetime.inputs.prediction.redo", "substrate.spacetime.inputs.prediction") ) {
+    if (DS %in% c("substrate.sthm.inputs.prediction.redo", "substrate.sthm.inputs.prediction") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "spacetime", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "sthm", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.spacetime.inputs.prediction" ) {
+      if (DS =="substrate.sthm.inputs.prediction" ) {
         #load( fn)
-        substrate = substrate.db( p, DS="substrate.spacetime.inputs.data" )
+        substrate = substrate.db( p, DS="substrate.sthm.inputs.data" )
         return( substrate )
       }
 
       ### prediction grids are the same as the input grid .. do nothing for now
       ### but kept separate from "*...inputs" in case thy diverge in future
       print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs")
-      # substrate = substrate.db( p, DS="substrate.spacetime.inputs.data" )
+      # substrate = substrate.db( p, DS="substrate.sthm.inputs.data" )
       # save (substrate, file=fn, compress=TRUE)
       return(fn)
     }
 
     #-------------------------
 
-    if ( DS %in% c("substrate.spacetime.finalize.redo", "substrate.spacetime.finalize" )) {
-      #// substrate( p, DS="substrate.spacetime.finalize(.redo)" return/create the
-      #//   spacetime interpolated method formatted and finalised for production use with predictions and statistics
+    if ( DS %in% c("substrate.sthm.finalize.redo", "substrate.sthm.finalize" )) {
+      #// substrate( p, DS="substrate.sthm.finalize(.redo)" return/create the
+      #//   sthm interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
-        paste( "substrate", "spacetime", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.spacetime.finalize" ) {
+        paste( "substrate", "sthm", "finalized", p$spatial.domain, "rdata", sep=".") )
+      if (DS =="substrate.sthm.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
       }
 
-      preds = spacetime( p=p, DS="inla.predictions" )
+      preds = sthm( p=p, DS="inla.predictions" )
       nr = p$nplons
       nc = p$nplats
 
@@ -277,7 +277,7 @@
       rm(preds); gc()
 
       # merge into statistics
-      BS = spacetime( p=p, DS="inla.statistics" )
+      BS = sthm( p=p, DS="inla.statistics" )
       B = cbind( BP, BS )
       names(B) = c( names(BP), "substrate.rangeMode", "substrate.rangeSD", "substrate.spatialSD", "substrate.observationSD" )
 
@@ -325,7 +325,7 @@
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.spacetime.finalize" )
+      Z0 = substrate.db( p=p0, DS="substrate.sthm.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
       above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above
@@ -336,11 +336,11 @@
       grids = unique( c( p$spatial.domain, p$grids.new ))
 
       for (gr in grids ) {
-        p1 = spacetime_parameters( type=gr )
+        p1 = spatial_parameters( type=gr )
         for (vn in names(Z0)) {
           Z[[vn]] = projectRaster(
-            from =rasterize( Z0, spacetime_parameters_to_raster(p0), field=vn, fun=mean),
-            to   =spacetime_parameters_to_raster( p1) )
+            from =rasterize( Z0, spatial_parameters_to_raster(p0), field=vn, fun=mean),
+            to   =spatial_parameters_to_raster( p1) )
         }
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )

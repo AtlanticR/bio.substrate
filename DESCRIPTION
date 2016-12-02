@@ -10,13 +10,13 @@ Imports:
   bio.base,
   bio.bathymetry, 
   bio.polygons,
-  bio.utilities 
+  bio.utilities,
+  bio.spacetime 
 Suggests: 
   knitr, 
   rmarkdown,
   lattice, 
   parallel, 
-  INLA, 
   rgdal, 
   raster, 
   geosphere, 
@@ -31,8 +31,9 @@ Suggests:
   splancs, 
   fields,
   bigmemory,
+  ff,
   bio.coastline,
-  bio.spacetime 
+  sthm 
 VignetteBuilder: knitr
 License: MIT
 LazyData: true
