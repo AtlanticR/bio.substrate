@@ -33,7 +33,7 @@ Suggests:
   bigmemory,
   ff,
   bio.coastline,
-  sthm 
+  conker 
 VignetteBuilder: knitr
 License: MIT
 LazyData: true

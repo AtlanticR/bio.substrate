@@ -201,13 +201,13 @@
 
     # ---------------
 
-    if (DS %in% c("substrate.sthm.inputs.data.redo", "substrate.sthm.inputs.data") ) {
+    if (DS %in% c("substrate.conker.inputs.data.redo", "substrate.conker.inputs.data") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "sthm", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "conker", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.sthm.inputs.data" ) {
+      if (DS =="substrate.conker.inputs.data" ) {
         load( fn)
         return( substrate )
       }
@@ -227,40 +227,40 @@
     ### ------
 
 
-    if (DS %in% c("substrate.sthm.inputs.prediction.redo", "substrate.sthm.inputs.prediction") ) {
+    if (DS %in% c("substrate.conker.inputs.prediction.redo", "substrate.conker.inputs.prediction") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "sthm", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "conker", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.sthm.inputs.prediction" ) {
+      if (DS =="substrate.conker.inputs.prediction" ) {
         #load( fn)
-        substrate = substrate.db( p, DS="substrate.sthm.inputs.data" )
+        substrate = substrate.db( p, DS="substrate.conker.inputs.data" )
         return( substrate )
       }
 
       ### prediction grids are the same as the input grid .. do nothing for now
       ### but kept separate from "*...inputs" in case thy diverge in future
       print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs")
-      # substrate = substrate.db( p, DS="substrate.sthm.inputs.data" )
+      # substrate = substrate.db( p, DS="substrate.conker.inputs.data" )
       # save (substrate, file=fn, compress=TRUE)
       return(fn)
     }
 
     #-------------------------
 
-    if ( DS %in% c("substrate.sthm.finalize.redo", "substrate.sthm.finalize" )) {
-      #// substrate( p, DS="substrate.sthm.finalize(.redo)" return/create the
-      #//   sthm interpolated method formatted and finalised for production use with predictions and statistics
+    if ( DS %in% c("substrate.conker.finalize.redo", "substrate.conker.finalize" )) {
+      #// substrate( p, DS="substrate.conker.finalize(.redo)" return/create the
+      #//   conker interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
-        paste( "substrate", "sthm", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.sthm.finalize" ) {
+        paste( "substrate", "conker", "finalized", p$spatial.domain, "rdata", sep=".") )
+      if (DS =="substrate.conker.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
       }
 
-      preds = sthm( p=p, DS="inla.predictions" )
+      preds = conker( p=p, DS="inla.predictions" )
       nr = p$nplons
       nc = p$nplats
 
@@ -277,7 +277,7 @@
       rm(preds); gc()
 
       # merge into statistics
-      BS = sthm( p=p, DS="inla.statistics" )
+      BS = conker( p=p, DS="inla.statistics" )
       B = cbind( BP, BS )
       names(B) = c( names(BP), "substrate.rangeMode", "substrate.rangeSD", "substrate.spatialSD", "substrate.observationSD" )
 
@@ -325,7 +325,7 @@
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.sthm.finalize" )
+      Z0 = substrate.db( p=p0, DS="substrate.conker.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
       above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above
