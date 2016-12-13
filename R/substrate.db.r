@@ -241,7 +241,7 @@
 
       ### prediction grids are the same as the input grid .. do nothing for now
       ### but kept separate from "*...inputs" in case thy diverge in future
-      print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs")
+      print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs with stat vars only")
       # substrate = substrate.db( p, DS="substrate.conker.inputs.data" )
       # save (substrate, file=fn, compress=TRUE)
       return(fn)
@@ -260,34 +260,33 @@
         return( B )
       }
 
-      preds = conker( p=p, DS="inla.predictions" )
-      nr = p$nplons
-      nc = p$nplats
-
-      BP = expand.grid( plon=p$plons, plat=p$plats ) # coords of full prediction area
-      attr( BP, "out.attrs") = NULL
-      BP$substrate.predictionMean = preds[,2]
-      BP$substrate.predictionSD   = preds[,3]
+      B = expand.grid( p$plons, p$plats, KEEP.OUT.ATTRS=FALSE)
+      names( B ) = c("plon", "plat")
+      Bmean = conker_db( p=p, DS="conker.prediction", ret="mean" )
+      Bsd = conker_db( p=p, DS="conker.prediction", ret="sd" )
+      B = cbind(B, Bmean, Bsd)
+      rm (Bmean, Bsd); gc()
+      names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
 
       # remove land
       oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" )
-      BP$substrate.predictionMean[oc] = NA
-      BP$substrate.predictionSD[oc]   = NA
+      B$grainsize[oc] = NA
+      B$grainsize.sd[oc]   = NA
 
       rm(preds); gc()
 
       # merge into statistics
-      BS = conker( p=p, DS="inla.statistics" )
-      B = cbind( BP, BS )
-      names(B) = c( names(BP), "substrate.rangeMode", "substrate.rangeSD", "substrate.spatialSD", "substrate.observationSD" )
+      BS = conker( p=p, DS="conker.statistics" )
+      B = cbind( B, BS )
+      # names(B) = c( names(B), p$statsvars )
 
       save( B, file=fn, compress=TRUE)
       return(fn)
 
       if (0) {
-        levelplot( log(substrate.predictionMean) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
-        levelplot( log(substrate.rangeMode) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
-        levelplot( substrate.rangeSD ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
+        levelplot( log(grainsize) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
+        levelplot( log(grainsize.range) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
+        levelplot( grainsize.sd ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
       }
     }
 
@@ -338,9 +337,9 @@
       for (gr in grids ) {
         p1 = spatial_parameters( type=gr )
         for (vn in names(Z0)) {
-          Z[[vn]] = projectRaster(
-            from =rasterize( Z0, spatial_parameters_to_raster(p0), field=vn, fun=mean),
-            to   =spatial_parameters_to_raster( p1) )
+          Z[[vn]] = raster::projectRaster(
+            from = raster::rasterize( Z0, bio.spacetime::spatial_parameters_to_raster(p0), field=vn, fun=mean),
+            to   = bio.spacetime::spatial_parameters_to_raster( p1) )
         }
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
