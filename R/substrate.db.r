@@ -201,13 +201,13 @@
 
     # ---------------
 
-    if (DS %in% c("substrate.conker.inputs.data.redo", "substrate.conker.inputs.data") ) {
+    if (DS %in% c("substrate.lstfilter.inputs.data.redo", "substrate.lstfilter.inputs.data") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "conker", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "lstfilter", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.conker.inputs.data" ) {
+      if (DS =="substrate.lstfilter.inputs.data" ) {
         load( fn)
         return( substrate )
       }
@@ -227,34 +227,34 @@
     ### ------
 
 
-    if (DS %in% c("substrate.conker.inputs.prediction.redo", "substrate.conker.inputs.prediction") ) {
+    if (DS %in% c("substrate.lstfilter.inputs.prediction.redo", "substrate.lstfilter.inputs.prediction") ) {
 
       datadir = project.datadirectory("bio.substrate", "data" )
 			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "conker", p$spatial.domain, "rdata", sep=".") )
+      fn = file.path( datadir, paste( "substrate", "lstfilter", p$spatial.domain, "rdata", sep=".") )
 
-      if (DS =="substrate.conker.inputs.prediction" ) {
+      if (DS =="substrate.lstfilter.inputs.prediction" ) {
         #load( fn)
-        substrate = substrate.db( p, DS="substrate.conker.inputs.data" )
+        substrate = substrate.db( p, DS="substrate.lstfilter.inputs.data" )
         return( substrate )
       }
 
       ### prediction grids are the same as the input grid .. do nothing for now
       ### but kept separate from "*...inputs" in case thy diverge in future
       print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs with stat vars only")
-      # substrate = substrate.db( p, DS="substrate.conker.inputs.data" )
+      # substrate = substrate.db( p, DS="substrate.lstfilter.inputs.data" )
       # save (substrate, file=fn, compress=TRUE)
       return(fn)
     }
 
     #-------------------------
 
-    if ( DS %in% c("substrate.conker.finalize.redo", "substrate.conker.finalize" )) {
-      #// substrate( p, DS="substrate.conker.finalize(.redo)" return/create the
-      #//   conker interpolated method formatted and finalised for production use with predictions and statistics
+    if ( DS %in% c("substrate.lstfilter.finalize.redo", "substrate.lstfilter.finalize" )) {
+      #// substrate( p, DS="substrate.lstfilter.finalize(.redo)" return/create the
+      #//   lstfilter interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
-        paste( "substrate", "conker", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.conker.finalize" ) {
+        paste( "substrate", "lstfilter", "finalized", p$spatial.domain, "rdata", sep=".") )
+      if (DS =="substrate.lstfilter.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
@@ -262,8 +262,8 @@
 
       B = expand.grid( p$plons, p$plats, KEEP.OUT.ATTRS=FALSE)
       names( B ) = c("plon", "plat")
-      Bmean = conker_db( p=p, DS="conker.prediction", ret="mean" )
-      Bsd = conker_db( p=p, DS="conker.prediction", ret="sd" )
+      Bmean = lstfilter_db( p=p, DS="lstfilter.prediction", ret="mean" )
+      Bsd = lstfilter_db( p=p, DS="lstfilter.prediction", ret="sd" )
       B = cbind(B, Bmean, Bsd)
       rm (Bmean, Bsd); gc()
       names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
@@ -276,7 +276,7 @@
       rm(preds); gc()
 
       # merge into statistics
-      BS = conker( p=p, DS="conker.statistics" )
+      BS = lstfilter( p=p, DS="lstfilter.statistics" )
       B = cbind( B, BS )
       # names(B) = c( names(B), p$statsvars )
 
@@ -324,7 +324,7 @@
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.conker.finalize" )
+      Z0 = substrate.db( p=p0, DS="substrate.lstfilter.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
       above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above

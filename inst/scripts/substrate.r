@@ -17,19 +17,19 @@
     substrate.db ( DS="substrate.initial.redo" ) # bring in Kostelev's data ... stored as a SpatialGridDataFrame
 		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here ...
 
-    substrate.db( p=p, DS="substrate.conker.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
-    substrate.db( p=p, DS="substrate.conker.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
+    substrate.db( p=p, DS="substrate.lstfilter.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
+    substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
 
 
   ### -----------------------------------------------------------------
 
   p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) )
-  p = conker( method="spatial.covariance", p=p, overwrite=TRUE ,
-    DATA=list ( input=substrate.db( p=p, DS="substrate.conker.inputs.data" ),
-                output=substrate.db( p=p, DS="substrate.conker.inputs.prediction")) )
+  p = lstfilter( method="spatial.covariance", p=p, overwrite=TRUE ,
+    DATA=list ( input=substrate.db( p=p, DS="substrate.lstfilter.inputs.data" ),
+                output=substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction")) )
 
       # to see the raw saved versions of the the results:
-      covSp = conker( p=p, DS="spatial.covariance" ) # load saved data
+      covSp = lstfilter( p=p, DS="spatial.covariance" ) # load saved data
 
 
   ### -----------------------------------------------------------------
@@ -37,16 +37,16 @@
   # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
   p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
 
-  p = conker( method="xy.inla",
-    DATA=list( input=substrate.db( p=p, DS="substrate.conker.inputs.data" ),
-               output=substrate.db( p=p, DS="substrate.conker.inputs.prediction") ),
+  p = lstfilter( method="xy.inla",
+    DATA=list( input=substrate.db( p=p, DS="substrate.lstfilter.inputs.data" ),
+               output=substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction") ),
     p=p, overwrite=TRUE )
 
       # to see the raw saved versions of the the results:
-      predSp = conker( p=p, DS="inla.predictions" )
-      statSp = conker( p=p, DS="inla.statistics" )
+      predSp = lstfilter( p=p, DS="inla.predictions" )
+      statSp = lstfilter( p=p, DS="inla.statistics" )
 
-  B = substrate.db( p=p, DS="substrate.conker.finalize" )
+  B = substrate.db( p=p, DS="substrate.lstfilter.finalize" )
 
   ### -----------------------------------------------------------------
   # as the interpolation process is so expensive, regrid based off the above run
