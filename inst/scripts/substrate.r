@@ -11,10 +11,10 @@
 		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here
   }
 
-  p = bio.bathymetry::bathymetry.parameters() # reset to defaults
-  p$hivemod_local_modelengine = "gam" 
+  p = bio.substrate::substrate.parameters() # reset to defaults
+  p$hivemod_local_modelengine = "kernel.density" 
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
-  p = bio.bathymetry::bathymetry.parameters( p=p, DS="hivemod" )
+  p = bio.substrate::substrate.parameters( p=p, DS="hivemod" )
 
   p$clusters = rep("localhost",  detectCores() )
   DATA = 'substrate.db( p=p, DS="substrate.hivemod" )'

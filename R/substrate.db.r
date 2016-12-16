@@ -203,31 +203,26 @@
 
     if ( DS=="substrate.hivemod") {
 
-      # begin with bathymetry data and add another layer to it
-      substrate = bathymetry.db( p, DS="complete", return.format = "list" )
-      substrate$substrate = projectRaster(
-          from=raster( substrate.db( DS="substrate.initial" ) ),
-          to=spatial_parameters_to_raster( p) )
-      substrate = as( brick(substrate), "SpatialGridDataFrame" )
-      
-      INP = substrate.db( p=p, DS="planar" )
+      covars = c("z", "dZ", "ddZ", "zsd", "range", "nu", "phi")
+      coords = c("plon","plat")
 
-        
-      B = bathymetry.db( p=p, DS="complete" )
+      B = bathymetry.db( p, DS="complete" )
       B = B[ which(B$z >0), ]
-      B$z = log( B$z) # ranges are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
-      OUT  = list( 
-        LOCS=B[,c("plon","plat")],
-        COV =list(
-          z=B$z,
+      B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
+      bid = hivemod::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
 
-        ) 
-      )          
+      S = substrate.db( DS="lonlat.highres" ) 
+      S = lonlat2planar( S,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
+      S = S[ ,c("plon", "plat", "grainsize" )]
+      sid = hivemod::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
+      u = match( sid, bid )
+      B_matched = B[u, ]
+      S = cbind(S, B_matched )
+      S = S[ is.finite( rowSums(S) ), ]
+      OUT  = list( LOCS=B[, coords], COV =B[, covars] )         
 
-      return( list ( 
-        input=substrate.db( p=p, DS="substrate.hivemod.inputs.data" ),
-        output=OUT )
-      )
+      return(  list( INPUT=S, OUTPUT=OUT ) )
+
     }
 
     #-------------------------
