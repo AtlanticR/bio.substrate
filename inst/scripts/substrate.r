@@ -1,52 +1,28 @@
 
-# process Substrate information using SPDE /RINLA .. no GMT dependency
-
   ## NOTE:: substrate size is really only relevant for SSE/snowcrab domain right now as no
   ##        other data source has been found/identified
   ##        but working at the size of canada.east.highres for compatibility with bathymetry
-  ##        .. might change this in future as it is also expensive in time .. but really only done once in a while, sooo...
   ## TODO:: add data collected by snow crab survey and any others for that matter
 
-  p = bio.substrate::substrate.parameters( DS="bio.substrate", nc=1 )
+  p = bio.substrate::substrate.parameters( DS="bio.substrate" )
 
-  # nc=5; p$clusters = c( rep( "nyx", nc ), rep ("tartarus", nc), rep("kaos", nc ) )
-
-
-  ### -----------------------------------------------------------------
-
+  if ( basedata.redo ) {
     substrate.db ( DS="substrate.initial.redo" ) # bring in Kostelev's data ... stored as a SpatialGridDataFrame
-		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here ...
+		substrate.db ( DS="lonlat.highres.redo" ) # in future .. additional data would be added here
+  }
 
-    substrate.db( p=p, DS="substrate.lstfilter.inputs.data.redo" )  # Warning: req ~ 15 min, 40 GB RAM (2015, Jae) data to model (with covariates if any)
-    substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction.redo" ) # i.e, pred locations (with covariates if any )
+  p = bio.bathymetry::bathymetry.parameters() # reset to defaults
+  p$hivemod_local_modelengine = "gam" 
+  p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
+  p = bio.bathymetry::bathymetry.parameters( p=p, DS="hivemod" )
 
+  p$clusters = rep("localhost",  detectCores() )
+  DATA = 'substrate.db( p=p, DS="substrate.hivemod" )'
+  p = hivemod( p=p, DATA=DATA )
+   
+  substrate.db( p=p, DS="substrate.hivemod.finalize.redo" )
 
-  ### -----------------------------------------------------------------
-
-  p$clusters = c( rep( "nyx", 24 ), rep ("tartarus", 24), rep("kaos", 24 ) )
-  p = lstfilter( method="spatial.covariance", p=p, overwrite=TRUE ,
-    DATA=list ( input=substrate.db( p=p, DS="substrate.lstfilter.inputs.data" ),
-                output=substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction")) )
-
-      # to see the raw saved versions of the the results:
-      covSp = lstfilter( p=p, DS="spatial.covariance" ) # load saved data
-
-
-  ### -----------------------------------------------------------------
-  # do not use all CPU's as INLA itself is partially run in parallel
-  # RAM reqiurements are a function of data density and mesh density .. currently ~ 12 GB / run
-  p$clusters = c( rep( "nyx", 5 ), rep ("tartarus", 5), rep("kaos", 5 ) )
-
-  p = lstfilter( method="xy.inla",
-    DATA=list( input=substrate.db( p=p, DS="substrate.lstfilter.inputs.data" ),
-               output=substrate.db( p=p, DS="substrate.lstfilter.inputs.prediction") ),
-    p=p, overwrite=TRUE )
-
-      # to see the raw saved versions of the the results:
-      predSp = lstfilter( p=p, DS="inla.predictions" )
-      statSp = lstfilter( p=p, DS="inla.statistics" )
-
-  B = substrate.db( p=p, DS="substrate.lstfilter.finalize" )
+  B = substrate.db( p=p, DS="substrate.hivemod.finalize" )
 
   ### -----------------------------------------------------------------
   # as the interpolation process is so expensive, regrid based off the above run

@@ -199,18 +199,9 @@
       return ( paste( filename.planar.grid, filename.planar, sep="\n" ) )
     }
 
-    # ---------------
+    #-------------------------
 
-    if (DS %in% c("substrate.lstfilter.inputs.data.redo", "substrate.lstfilter.inputs.data") ) {
-
-      datadir = project.datadirectory("bio.substrate", "data" )
-			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "lstfilter", p$spatial.domain, "rdata", sep=".") )
-
-      if (DS =="substrate.lstfilter.inputs.data" ) {
-        load( fn)
-        return( substrate )
-      }
+    if ( DS=="substrate.hivemod") {
 
       # begin with bathymetry data and add another layer to it
       substrate = bathymetry.db( p, DS="complete", return.format = "list" )
@@ -218,43 +209,35 @@
           from=raster( substrate.db( DS="substrate.initial" ) ),
           to=spatial_parameters_to_raster( p) )
       substrate = as( brick(substrate), "SpatialGridDataFrame" )
+      
+      INP = substrate.db( p=p, DS="planar" )
 
-      save (substrate, file=fn, compress=TRUE)
-      return(fn)
-    }
+        
+      B = bathymetry.db( p=p, DS="complete" )
+      B = B[ which(B$z >0), ]
+      B$z = log( B$z) # ranges are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
+      OUT  = list( 
+        LOCS=B[,c("plon","plat")],
+        COV =list(
+          z=B$z,
 
+        ) 
+      )          
 
-    ### ------
-
-
-    if (DS %in% c("substrate.lstfilter.inputs.prediction.redo", "substrate.lstfilter.inputs.prediction") ) {
-
-      datadir = project.datadirectory("bio.substrate", "data" )
-			dir.create( datadir, showWarnings=F, recursive=T )
-      fn = file.path( datadir, paste( "substrate", "lstfilter", p$spatial.domain, "rdata", sep=".") )
-
-      if (DS =="substrate.lstfilter.inputs.prediction" ) {
-        #load( fn)
-        substrate = substrate.db( p, DS="substrate.lstfilter.inputs.data" )
-        return( substrate )
-      }
-
-      ### prediction grids are the same as the input grid .. do nothing for now
-      ### but kept separate from "*...inputs" in case thy diverge in future
-      print( "This is just a placeholder for more elaborate models ..  for now, grids are the same as inputs with stat vars only")
-      # substrate = substrate.db( p, DS="substrate.lstfilter.inputs.data" )
-      # save (substrate, file=fn, compress=TRUE)
-      return(fn)
+      return( list ( 
+        input=substrate.db( p=p, DS="substrate.hivemod.inputs.data" ),
+        output=OUT )
+      )
     }
 
     #-------------------------
 
-    if ( DS %in% c("substrate.lstfilter.finalize.redo", "substrate.lstfilter.finalize" )) {
-      #// substrate( p, DS="substrate.lstfilter.finalize(.redo)" return/create the
-      #//   lstfilter interpolated method formatted and finalised for production use with predictions and statistics
+    if ( DS %in% c("substrate.hivemod.finalize.redo", "substrate.hivemod.finalize" )) {
+      #// substrate( p, DS="substrate.hivemod.finalize(.redo)" return/create the
+      #//   hivemod interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
-        paste( "substrate", "lstfilter", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.lstfilter.finalize" ) {
+        paste( "substrate", "hivemod", "finalized", p$spatial.domain, "rdata", sep=".") )
+      if (DS =="substrate.hivemod.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
@@ -262,8 +245,8 @@
 
       B = expand.grid( p$plons, p$plats, KEEP.OUT.ATTRS=FALSE)
       names( B ) = c("plon", "plat")
-      Bmean = lstfilter_db( p=p, DS="lstfilter.prediction", ret="mean" )
-      Bsd = lstfilter_db( p=p, DS="lstfilter.prediction", ret="sd" )
+      Bmean = hivemod_db( p=p, DS="hivemod.prediction", ret="mean" )
+      Bsd = hivemod_db( p=p, DS="hivemod.prediction", ret="sd" )
       B = cbind(B, Bmean, Bsd)
       rm (Bmean, Bsd); gc()
       names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
@@ -276,7 +259,7 @@
       rm(preds); gc()
 
       # merge into statistics
-      BS = lstfilter( p=p, DS="lstfilter.statistics" )
+      BS = hivemod( p=p, DS="hivemod.statistics" )
       B = cbind( B, BS )
       # names(B) = c( names(B), p$statsvars )
 
@@ -324,7 +307,7 @@
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.lstfilter.finalize" )
+      Z0 = substrate.db( p=p0, DS="substrate.hivemod.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
       above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above

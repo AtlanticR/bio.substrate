@@ -33,7 +33,7 @@ Suggests:
   bigmemory,
   ff,
   bio.coastline,
-  lstfilter 
+  hivemod 
 VignetteBuilder: knitr
 License: MIT
 LazyData: true
