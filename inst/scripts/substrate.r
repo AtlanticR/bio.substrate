@@ -12,7 +12,7 @@
   }
 
   p = bio.substrate::substrate.parameters() # reset to defaults
-  p$hivemod_local_modelengine = "kernel.density" 
+  p$hivemod_local_modelengine = "fft" 
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
   p = bio.substrate::substrate.parameters( p=p, DS="hivemod" )
 

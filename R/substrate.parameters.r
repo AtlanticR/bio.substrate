@@ -29,8 +29,8 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$depth.filter = log(1) # depth is given as log(depth) so, choose andy stats locations with elevation > 1 m as being on land
 
     p$hivemod_nonconvexhull_alpha = 20  # radius in distance units (km) to use for determining boundaries
-    p$hivemod_phi = p$pres/5 # FFT based method when operating gloablly
-    p$hivemod_nu = 0.5 # this is exponential covar
+    p$hivemod_lowpass_phi = p$pres/5 # FFT based method when operating gloablly
+    p$hivemod_lowpass_nu = 0.5 # this is exponential covar
     p$hivemod_noise = 0.001  # distance units for eps noise to permit mesh gen for boundaries
     p$hivemod_quantile_bounds = c(0.01, 0.99) # remove these extremes in interpolations
     
