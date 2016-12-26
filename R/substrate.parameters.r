@@ -73,7 +73,12 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
       p$hivemod_local_family = gaussian()
       p$hivemod_local_family_bayesx ="gaussian"
 
-    } 
+    } else {
+    
+      message( "The specified hivemod_local_modelengine is not tested/supported ... you are on your own ;) ..." )
+
+    }
+    
 
       
     return(p)
