@@ -201,7 +201,7 @@
 
     #-------------------------
 
-    if ( DS=="substrate.hivemod") {
+    if ( DS=="substrate.lbm") {
 
       covars = c("z", "dZ", "ddZ", "zsd", "range", "nu", "phi")
       coords = c("plon","plat")
@@ -209,12 +209,12 @@
       B = bathymetry.db( p, DS="complete" )
       B = B[ which(B$z >0), ]
       B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
-      bid = hivemod::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
+      bid = lbm::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
 
       S = substrate.db( DS="lonlat.highres" ) 
       S = lonlat2planar( S,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
       S = S[ ,c("plon", "plat", "grainsize" )]
-      sid = hivemod::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
+      sid = lbm::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
       u = match( sid, bid )
       B_matched = B[u, ]
       S = cbind(S, B_matched )
@@ -227,12 +227,12 @@
 
     #-------------------------
 
-    if ( DS %in% c("substrate.hivemod.finalize.redo", "substrate.hivemod.finalize" )) {
-      #// substrate( p, DS="substrate.hivemod.finalize(.redo)" return/create the
-      #//   hivemod interpolated method formatted and finalised for production use with predictions and statistics
+    if ( DS %in% c("substrate.lbm.finalize.redo", "substrate.lbm.finalize" )) {
+      #// substrate( p, DS="substrate.lbm.finalize(.redo)" return/create the
+      #//   lbm interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
-        paste( "substrate", "hivemod", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.hivemod.finalize" ) {
+        paste( "substrate", "lbm", "finalized", p$spatial.domain, "rdata", sep=".") )
+      if (DS =="substrate.lbm.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
@@ -240,8 +240,8 @@
 
       B = expand.grid( p$plons, p$plats, KEEP.OUT.ATTRS=FALSE)
       names( B ) = c("plon", "plat")
-      Bmean = hivemod_db( p=p, DS="hivemod.prediction", ret="mean" )
-      Bsd = hivemod_db( p=p, DS="hivemod.prediction", ret="sd" )
+      Bmean = lbm_db( p=p, DS="lbm.prediction", ret="mean" )
+      Bsd = lbm_db( p=p, DS="lbm.prediction", ret="sd" )
       B = cbind(B, Bmean, Bsd)
       rm (Bmean, Bsd); gc()
       names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
@@ -254,7 +254,7 @@
       rm(preds); gc()
 
       # merge into statistics
-      BS = hivemod( p=p, DS="hivemod.statistics" )
+      BS = lbm( p=p, DS="lbm.statistics" )
       B = cbind( B, BS )
       # names(B) = c( names(B), p$statsvars )
 
@@ -302,7 +302,7 @@
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.hivemod.finalize" )
+      Z0 = substrate.db( p=p0, DS="substrate.lbm.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
       above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above

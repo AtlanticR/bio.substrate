@@ -12,19 +12,17 @@
   }
 
   p = bio.substrate::substrate.parameters() # reset to defaults
-  p$hivemod_local_modelengine = "fft" 
+  p$lbm_local_modelengine = "krige" 
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
-  p = bio.substrate::substrate.parameters( p=p, DS="hivemod" )
-
-  p$clusters = rep("localhost",  detectCores() )
-  DATA = 'substrate.db( p=p, DS="substrate.hivemod" )'
-  p = hivemod( p=p, DATA=DATA )
+  p = bio.substrate::substrate.parameters( p=p, DS="lbm" )
+  # p$clusters = rep("localhost",  detectCores() )
+  DATA = 'substrate.db( p=p, DS="substrate.lbm" )'
+  p = lbm( p=p, DATA=DATA )
    
-  substrate.db( p=p, DS="substrate.hivemod.finalize.redo" )
+  substrate.db( p=p, DS="substrate.lbm.finalize.redo" )
+  # B = substrate.db( p=p, DS="substrate.lbm.finalize" )
 
-  B = substrate.db( p=p, DS="substrate.hivemod.finalize" )
-
-  ### -----------------------------------------------------------------
+ 
   # as the interpolation process is so expensive, regrid based off the above run
   # if you want more, will need to add to the list and modify the selection criteria
   p$grids.new = c( "canada.east.highres", "canada.east", "SSE", "snowcrab", "SSE.mpa" )
