@@ -47,58 +47,6 @@
     # ---------------------------------------
 
 
-    if (DS=="substrate.gmt.retired") {
-
-      ### This uses GMT-based methods .. it is now deprecated
-
-      p = list()
-      p$libs = bioLibrary( "bio.spacetime", "bio.utilities", "bio.substrate", "bio.bathymetry", "bio.polygons" )
-      p$libs = c(p$libs, RLibrary( "maptools" , "rgdal" ) )
-
-      # --------------------------------------
-      # create the main database
-      # some require upto 1.2 GB RAM, ~ 5 min
-      # no need to run again unless the substrate data file is updated ...
-
-      make.substrate.db = FALSE
-      if (make.substrate.db) {
-        substrate.db ( DS="substrate.initial.redo" ) # stored as a SpatialGridDataFrame
-        substrate.db ( DS="lonlat.highres.redo" ) # simple conversion to lonlat
-        for ( j in c( "SSE", "canada.east" ) ) {  # sse and snowcrab have same domains
-          p = spatial_parameters( type=j )
-          substrate.db ( p, DS="lonlat.interpolated.redo" )
-          substrate.db ( p, DS="lonlat.redo" )
-          substrate.db ( p, DS="planar.redo" )
-        }
-      }
-
-
-      # --------------------------------------
-      # substrate = substrate.db( p, DS="lonlat.highres" ) # or lonlat to refresh, planar or planar.saved
-      # library(lattice)
-      # levelplot( log(grainsize) ~ lon + lat, substrate, main = "ln( grainsize; mm )", aspect="iso")
-
-      # load the imported data in a data.frame format in a snow crab-consistent coordinates framework
-      p = spatial_parameters( type="SSE" )
-
-      substrate = substrate.db( p, DS="planar" ) # or lonlat to refresh, planar or planar.saved
-      i = which( substrate$plon< 990 &  substrate$plon > 220  &
-                 substrate$plat< 5270 &  substrate$plat > 4675
-      )
-      substrate = substrate[ i, ]
-      substrate$grainsize =log( substrate$grainsize )
-      inside = filter.region.polygon( substrate[, c("plon", "plat") ], "cfaall", planar=T)
-      datacols = c("plon", "plat", "grainsize")
-      datarange = seq(-5,3, length.out=50)
-      cols = color.code( "blue.black", datarange )
-      outfn = "substrate.grainsize"
-      annot = "ln ( Grain size; mm )"
-      map( xyz=substrate[inside,datacols], cfa.regions=F, depthcontours=T, pts=NULL, annot=annot,
-        fn=outfn, loc=file.path( project.datadirectory("bio.substrate"), "R"), at=datarange , col.regions=cols )
-
-    }
-
-
     # ---------------------------------------
 
 
@@ -203,24 +151,25 @@
 
     if ( DS=="lbm.inputs") {
 
-      covars = c("z", "dZ", "ddZ", "zsd", "range", "nu", "phi")
-      coords = c("plon","plat")
-
       B = bathymetry.db( p, DS="baseline", varnames=p$varnames )
       B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
       bid = lbm::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
 
-      S = substrate.db( DS="lonlat.highres" ) 
+      S = substrate.db( p=p, DS="lonlat.highres" ) 
       S = lonlat2planar( S,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
       S = S[ ,c("plon", "plat", "grainsize" )]
-      sid = lbm::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
+      S$log.substrate.grainsize = log( S$grainsize )
+      S$grainsize = NULL
+
+      # merge covars into S
+      sid = lbm::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons, p$nplats) )
       u = match( sid, bid )
       B_matched = B[u, ]
       S = cbind(S, B_matched )
       S = S[ is.finite( rowSums(S) ), ]
-      OUT  = list( LOCS=B[, coords], COV =B[, covars] )         
+      OUT  = list( LOCS=B[, p$variables$LOCS], COV =B[,  p$variables$COV ] )         
 
-      return(  list( INPUT=S, OUTPUT=OUT ) )
+      return(  list( input=S, output=OUT ) )
 
     }
 
@@ -310,6 +259,7 @@
       grids = unique( c( p$spatial.domain, p$new.grids ))
 
       for (gr in grids ) {
+        Z = NULL
         print(gr)
         p1 = spatial_parameters( type=gr )
         for (vn in names(Z0)) {

@@ -44,13 +44,12 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$n.max = 2500 # numerical time/memory constraint -- anything larger takes too much time
     p$sampling = c( 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.5, 1.75, 2 )  # fractions of median distance scale to try in local block search
  
-    p$variables = list( Y="grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )
+    p$variables = list( Y="log.substrate.grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )
     p$varnames = c( p$variables$LOCS, p$variables$COV ) #
 
     p$lbm_global_modelengine = "gam"  # if ==NULL, this means skip global model
     p$lbm_global_modelformula = formula(
-      grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") +
-      s(z, k=3, bs="ts") + s(dZ, k=3, bs="ts" ) + s(ddZ, k=3, bs="ts" ) )
+      log.substrate.grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") +  s(z, k=3, bs="ts") + s(dZ, k=3, bs="ts" ) + s(ddZ, k=3, bs="ts" ) )
     p$lbm_global_family = gaussian(link="log")
     p$lbm_local_family = gaussian() # residuals are already log-tranformed so expect gaussian ..
 
@@ -65,12 +64,13 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
       # GAM are overly smooth .. adding more knots might be good but speed is the cost .. k=50 to 100 seems to work nicely
       ## data range is from -100 to 5467 m .. 1000 shifts all to positive valued by one order of magnitude
       p$lbm_local_modelformula = formula( 
-        grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") )  
+        log.substrate.grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") )  
       p$lbm_local_model_distanceweighted = TRUE  
-     
+      p$lbm_gam_optimizer ="perf"
+
     } else if ( p$lbm_local_modelengine == "bayesx" ) {
     
-      p$lbm_local_modelformula = formula( grainsize ~ s(plon, bs="ps") + s(plat, bs="ps") + s(plon, plat, bs="te") )  # more detail than "gs" .. "te" is preferred
+      p$lbm_local_modelformula = formula( log.substrate.grainsize ~ s(plon, bs="ps") + s(plat, bs="ps") + s(plon, plat, bs="te") )  # more detail than "gs" .. "te" is preferred
       p$lbm_local_model_bayesxmethod="MCMC"  # REML actually seems to be the same speed ... i.e., most of the time is spent in thhe prediction step ..
       p$lbm_local_model_distanceweighted = TRUE  
       p$lbm_local_family_bayesx ="gaussian"
