@@ -4,7 +4,7 @@
   ##        but working at the size of canada.east.highres for compatibility with bathymetry
   ## TODO:: add data collected by snow crab survey and any others for that matter
 
-  p = bio.substrate::substrate.parameters( DS="bio.substrate" )
+  p = bio.substrate::substrate.parameters()
 
   if ( basedata.redo ) {
     substrate.db ( DS="substrate.initial.redo" ) # bring in Kostelev's data ... stored as a SpatialGridDataFrame
@@ -16,16 +16,16 @@
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
   p = bio.substrate::substrate.parameters( p=p, DS="lbm" )
   # p$clusters = rep("localhost",  detectCores() )
-  DATA = 'substrate.db( p=p, DS="substrate.lbm" )'
-  p = lbm( p=p, DATA=DATA )
+  p = lbm( p=p, DATA='substrate.db( p=p, DS="lbm.inputs" )' )
    
-  substrate.db( p=p, DS="substrate.lbm.finalize.redo" )
-  # B = substrate.db( p=p, DS="substrate.lbm.finalize" )
+  substrate.db( p=p, DS="lbm.finalize.redo" )
+  # B = substrate.db( p=p, DS="lbm.finalize" )
 
  
   # as the interpolation process is so expensive, regrid based off the above run
   # if you want more, will need to add to the list and modify the selection criteria
-  p$grids.new = c( "canada.east.highres", "canada.east", "SSE", "snowcrab", "SSE.mpa" )
+  # this requires "raster" (it is possible to use fields and be a bit faster but this is simpler for now)
+  p$new.grids = c( "canada.east.highres", "canada.east", "SSE", "snowcrab", "SSE.mpa" )
   substrate.db( p=p, DS="complete.redo" )
 
   # test outputs/ access methods

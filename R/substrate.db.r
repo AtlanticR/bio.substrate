@@ -1,6 +1,6 @@
 
 
-  substrate.db = function( p=NULL, DS=NULL ) {
+  substrate.db = function( p=NULL, DS=NULL, varnames=NULL ) {
 
     if ( DS %in% c("substrate.initial", "substrate.initial.redo") ) {
       # Read in the ArcInfo ascii grid file using library maptools and output a SpatialGridDataFrame
@@ -201,13 +201,12 @@
 
     #-------------------------
 
-    if ( DS=="substrate.lbm") {
+    if ( DS=="lbm.inputs") {
 
       covars = c("z", "dZ", "ddZ", "zsd", "range", "nu", "phi")
       coords = c("plon","plat")
 
-      B = bathymetry.db( p, DS="complete" )
-      B = B[ which(B$z >0), ]
+      B = bathymetry.db( p, DS="baseline", varnames=p$varnames )
       B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
       bid = lbm::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
 
@@ -227,12 +226,12 @@
 
     #-------------------------
 
-    if ( DS %in% c("substrate.lbm.finalize.redo", "substrate.lbm.finalize" )) {
-      #// substrate( p, DS="substrate.lbm.finalize(.redo)" return/create the
+    if ( DS %in% c("lbm.finalize.redo", "lbm.finalize" )) {
+      #// substrate( p, DS="lbm.finalize(.redo)" return/create the
       #//   lbm interpolated method formatted and finalised for production use with predictions and statistics
       fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
         paste( "substrate", "lbm", "finalized", p$spatial.domain, "rdata", sep=".") )
-      if (DS =="substrate.lbm.finalize" ) {
+      if (DS =="lbm.finalize" ) {
         B = NULL
         if ( file.exists ( fn) ) load( fn)
         return( B )
@@ -247,7 +246,7 @@
       names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
 
       # remove land
-      oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" )
+      oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" ,internal.projection=p$internal.projection)
       B$grainsize[oc] = NA
       B$grainsize.sd[oc]   = NA
 
@@ -283,46 +282,49 @@
         if ( is.null(domain)) {
           if ( exists("spatial.domain", p)) {
             domain = p$spatial.domain
-          } else if ( exists( "grids.new", p) )  { # over-rides p$spatial domain
-            if( length( p$grids.new )== 1 ) {
-              domain = p$grids.new
+          } else if ( exists( "new.grids", p) )  { # over-rides p$spatial domain
+            if( length( p$new.grids )== 1 ) {
+              domain = p$new.grids
         } } }
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", domain, "rdata", sep=".") )
         if ( file.exists ( fn) ) load( fn)
-        if ( return.format == "dataframe" ) { ## default
-          Z = as( brick(Z), "SpatialPointsDataFrame" )
-          Z = as.data.frame(Z)
-          u = names(Z)
-          names(Z)[ which( u=="x") ] = "plon"
-          names(Z)[ which( u=="y") ] = "plat"
-          return( Z )
+
+        Znames = names(Z)
+        if (is.null(varnames)) {
+          varnames=Znames
+        } else {
+          varnames = intersect( Znames, varnames )
         }
-        if ( return.format %in% c("list") ) return( Z  )
+        Z = Z[ , varnames]
+
+        return( Z )
       }
 
       p0 = p  # the originating parameters
-      Z0 = substrate.db( p=p0, DS="substrate.lbm.finalize" )
+
+      Z0 = substrate.db( p=p0, DS="lbm.finalize" )
       coordinates( Z0 ) = ~ plon + plat
       crs(Z0) = crs( p0$interal.crs )
-      above.sealevel = which( Z0$z < 0 ) # depth values < 0 are above
-      if (length(above.sealevel)>0) Z0[ above.sealevel ] = NA
-
-      Z = list()
-
-      grids = unique( c( p$spatial.domain, p$grids.new ))
+      
+      grids = unique( c( p$spatial.domain, p$new.grids ))
 
       for (gr in grids ) {
+        print(gr)
         p1 = spatial_parameters( type=gr )
         for (vn in names(Z0)) {
           Z[[vn]] = raster::projectRaster(
             from = raster::rasterize( Z0, bio.spacetime::spatial_parameters_to_raster(p0), field=vn, fun=mean),
             to   = bio.spacetime::spatial_parameters_to_raster( p1) )
         }
+        Z = as( brick(Z), "SpatialPointsDataFrame" )
+        Z = as.data.frame(Z)
+        u = names(Z)
+        names(Z)[ which( u=="x") ] = "plon"
+        names(Z)[ which( u=="y") ] = "plat"
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
         save (Z, file=fn, compress=TRUE)
-        print(fn)
       }
       return ( "Completed subsets" )
     }
