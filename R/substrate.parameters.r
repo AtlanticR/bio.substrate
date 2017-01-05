@@ -38,10 +38,10 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$lbm_distance_statsgrid = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
     p$lbm_distance_scale = 25 # km ... approx guess of 95% AC range 
     p$lbm_distance_min = p$lbm_distance_statsgrid 
-    p$lbm_distance_max = 50 
+    p$lbm_distance_max = 60 
 
-    p$n.min = 50 # n.min/n.max changes with resolution
-    p$n.max = 2500 # numerical time/memory constraint -- anything larger takes too much time
+    p$n.min = 100 # n.min/n.max changes with resolution
+    p$n.max = 3000 # numerical time/memory constraint -- anything larger takes too much time .. anything less .. errors
     p$sampling = c( 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.5, 1.75, 2 )  # fractions of median distance scale to try in local block search
  
     p$variables = list( Y="log.substrate.grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )

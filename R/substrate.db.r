@@ -186,23 +186,24 @@
         return( B )
       }
 
-      B = expand.grid( p$plons, p$plats, KEEP.OUT.ATTRS=FALSE)
-      names( B ) = c("plon", "plat")
+      B = bathymetry.db( p, DS="baseline" )
       Bmean = lbm_db( p=p, DS="lbm.prediction", ret="mean" )
       Bsd = lbm_db( p=p, DS="lbm.prediction", ret="sd" )
-      B = cbind(B, Bmean, Bsd)
+      B = as.data.frame( cbind(B, Bmean, Bsd) )
       rm (Bmean, Bsd); gc()
-      names(B) = c( "plon", "plat", "grainsize", "grainsize.sd") 
+      names(B) = c( "plon", "plat", "log.substrate.grainsize", "log.substrate.grainsize.sd") 
 
-      # remove land
-      oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" ,internal.projection=p$internal.projection)
-      B$grainsize[oc] = NA
-      B$grainsize.sd[oc]   = NA
+      if (0) {
+            # remove land
+            oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" ,internal.projection=p$internal.projection)
+            B$grainsize[oc] = NA
+            B$grainsize.sd[oc]   = NA
 
-      rm(preds); gc()
+            rm(oc); gc()
+      }
 
       # merge into statistics
-      BS = lbm( p=p, DS="lbm.statistics" )
+      BS = lbm_db( p=p, DS="stats.to.prediction.grid" )
       B = cbind( B, BS )
       # names(B) = c( names(B), p$statsvars )
 
@@ -253,29 +254,63 @@
       p0 = p  # the originating parameters
 
       Z0 = substrate.db( p=p0, DS="lbm.finalize" )
-      coordinates( Z0 ) = ~ plon + plat
-      crs(Z0) = crs( p0$interal.crs )
-      
+      Z0i = as.matrix( round( cbind( 
+        ( Z0$plon-p0$plons[1])/p0$pres + 1, (Z0$plat-p0$plats[1])/p0$pres + 1
+      ) ) ) 
+   
+      varnames = setdiff( names(Z0), c("plon","plat", "lon", "lat") )  
+      #using fields
       grids = unique( c( p$spatial.domain, p$new.grids ))
 
+  
       for (gr in grids ) {
-        Z = NULL
         print(gr)
-        p1 = spatial_parameters( type=gr )
-        for (vn in names(Z0)) {
-          Z[[vn]] = raster::projectRaster(
-            from = raster::rasterize( Z0, bio.spacetime::spatial_parameters_to_raster(p0), field=vn, fun=mean),
-            to   = bio.spacetime::spatial_parameters_to_raster( p1) )
+
+        p1 = spatial_parameters( type=gr ) #target projection
+           
+        if ( p0$spatial.domain != p1$spatial.domain ) {
+
+          Z = expand.grid( plon=p1$plons, plat=p1$plats, KEEP.OUT.ATTRS=FALSE )
+          Zi = as.matrix( round( cbind( 
+            ( Z$plon-p1$plons[1])/p1$pres + 1, (Z$plat-p1$plats[1])/p1$pres + 1
+          ) ) ) 
+     
+          Z = planar2lonlat( Z, proj.type=p1$internal.crs )
+          Z$plon_1 = Z$plon # store original coords
+          Z$plat_1 = Z$plat
+          Z = lonlat2planar( Z, proj.type=p0$internal.crs )
+          p1_wgts = fields::setup.image.smooth( 
+            nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres,
+            theta=p1$pres, xwidth=4*p1$pres, ywidth=4*p1$pres )
+           
+          for (vn in varnames) {
+            M = matrix(NA, nrow=p0$nplons, ncol=p0$nplats )
+            M[Z0i] = Z0[[vn]]
+            Znew = fields::interp.surface( list(x=p0$plons, y=p0$plats, z=M), loc=Z[, c("plon", "plat")] ) #linear interpolation
+            Z[[vn]] = c(Znew)
+            ii = which( !is.finite( Z[[vn]] ) )
+            if ( length( ii) > 0 ) {
+              MM = matrix(NA, nrow=p1$nplons, ncol=p1$nplats )
+              MM[Zi] = Z[[vn]]
+              Znew = fields::image.smooth( MM, dx=p1$pres, dy=p1$pres, wght=p1_wgts )
+              Zii = fields::interp.surface( list(x=p1$plons, y=p1$plats, z=Znew$z), loc=Z[, c("plon_1", "plat_1")] ) #linear interpolation
+              Z[[vn]][ii] = Zii[ii]
+            }
+          }
+          Z$plon = Z$plon_1
+          Z$plat = Z$plat_1
+        
+        } else {
+          Z = Z0
         }
-        Z = as( brick(Z), "SpatialPointsDataFrame" )
-        Z = as.data.frame(Z)
-        u = names(Z)
-        names(Z)[ which( u=="x") ] = "plon"
-        names(Z)[ which( u=="y") ] = "plat"
+
+        Z$plon_1 = Z$plat_1 = Z$lon = Z$lat = NULL
+
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
         save (Z, file=fn, compress=TRUE)
       }
+
       return ( "Completed subsets" )
     }
 
