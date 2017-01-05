@@ -45,7 +45,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$sampling = c( 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.5, 1.75, 2 )  # fractions of median distance scale to try in local block search
  
     p$variables = list( Y="log.substrate.grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )
-    p$varnames = c( p$variables$LOCS, p$variables$COV ) #
+    p$varnames = c( p$variables$LOCS, p$variables$COV ) # to retain fom data sources
 
     p$lbm_global_modelengine = "gam"  # if ==NULL, this means skip global model
     p$lbm_global_modelformula = formula(

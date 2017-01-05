@@ -20,13 +20,13 @@
   p = bio.substrate::substrate.parameters( p=p, DS="lbm" )
   # p$clusters = rep("localhost",  detectCores() )
    
-
+  DATA = 'substrate.db( p=p, DS="lbm.inputs" )'
+  p = lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA )
+  
   if (0) {
-    # to do just the global model
-    DATA=substrate.db( p=p, DS="lbm.inputs" )
-    lbm_db( p=p, DS="global_model.redo", B=DATA$input )
+    # to summarize just the global model
     o = lbm_db( p=p, DS="global_model" )
-    summary(o)  #:
+    summary(o)  
   
 # Global model results: .. dZ a lbm_db( p=p, DS="global_model" and ddZ not informative (at a global level) .. drop
 
@@ -61,8 +61,9 @@
 
   }
 
-
-  p = lbm( p=p, DATA='substrate.db( p=p, DS="lbm.inputs" )' )
+  # DATA='substrate.db( p=p, DS="lbm.inputs" )'
+  # p = lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
+  p = lbm( p=p, tasks=c( "stage1", "stage2", "stage3" ) )
 
   substrate.db( p=p, DS="lbm.finalize.redo" )
   # B = substrate.db( p=p, DS="lbm.finalize" )

@@ -186,7 +186,7 @@
         return( B )
       }
 
-      B = bathymetry.db( p, DS="baseline" )
+      B = bathymetry.db( p, DS="baseline" ) # just coords
       Bmean = lbm_db( p=p, DS="lbm.prediction", ret="mean" )
       Bsd = lbm_db( p=p, DS="lbm.prediction", ret="sd" )
       B = as.data.frame( cbind(B, Bmean, Bsd) )
