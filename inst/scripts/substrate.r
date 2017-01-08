@@ -63,7 +63,8 @@
 
   # DATA='substrate.db( p=p, DS="lbm.inputs" )'
   # p = lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
-  p = lbm( p=p, tasks=c( "stage1", "stage2", "stage3" ) )
+  p = lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  
+  p = lbm( p=p, tasks=c( "save" ) )
 
   substrate.db( p=p, DS="lbm.finalize.redo" )
   # B = substrate.db( p=p, DS="lbm.finalize" )

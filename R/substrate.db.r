@@ -151,9 +151,12 @@
 
     if ( DS=="lbm.inputs") {
 
+      gridparams = list( dims=c(p$nplons, p$nplats), corner=c(p$plons[1], p$plats[1]), res=c(p$pres, p$pres) )
+
       B = bathymetry.db( p, DS="baseline", varnames=p$varnames )
       B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
-      bid = lbm::array_map( "2->1", trunc(cbind(B$plon-p$plon[1], B$plat-p$plat[1])/p$pres) + 1, c(p$nplons,p$nplats) )
+
+      bid = lbm::array_map( "xy->1", B[,c("plon", "plat")], gridparams=gridparams )
 
       S = substrate.db( p=p, DS="lonlat.highres" ) 
       S = lonlat2planar( S,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
@@ -162,7 +165,8 @@
       S$grainsize = NULL
 
       # merge covars into S
-      sid = lbm::array_map( "2->1", trunc(cbind(S$plon-p$plon[1], S$plat-p$plat[1])/p$pres) + 1, c(p$nplons, p$nplats) )
+      sid = lbm::array_map( "xy->1", S[,c("plon", "plat")], gridparams=gridparams )
+
       u = match( sid, bid )
       B_matched = B[u, ]
       S = cbind(S, B_matched )
@@ -178,7 +182,7 @@
     if ( DS %in% c("lbm.finalize.redo", "lbm.finalize" )) {
       #// substrate( p, DS="lbm.finalize(.redo)" return/create the
       #//   lbm interpolated method formatted and finalised for production use with predictions and statistics
-      fn = file.path(  project.datadirectory("bio.substrate"), "interpolated",
+      fn = file.path(  project.datadirectory("bio.substrate"), "lbm",
         paste( "substrate", "lbm", "finalized", p$spatial.domain, "rdata", sep=".") )
       if (DS =="lbm.finalize" ) {
         B = NULL
@@ -224,7 +228,7 @@
     if ( DS %in% c( "complete", "complete.redo" ) ) {
      #// substrate.db( DS="complete" .. ) returns the final form of the substrate data after
      #// regridding and selection to area of interest as specificied by girds.new=c("SSE", etc)
-      Z = NULL
+      S = NULL
 
       if ( DS %in% c("complete") ) {
 
@@ -236,27 +240,26 @@
             if( length( p$new.grids )== 1 ) {
               domain = p$new.grids
         } } }
+        
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", domain, "rdata", sep=".") )
         if ( file.exists ( fn) ) load( fn)
 
-        Znames = names(Z)
+        Snames = names(S)
         if (is.null(varnames)) {
-          varnames=Znames
+          varnames=Snames
         } else {
-          varnames = intersect( Znames, varnames )
+          varnames = intersect( Snames, varnames )
         }
-        Z = Z[ , varnames]
+        S = S[ , varnames]
 
-        return( Z )
+        return( S )
       }
 
       p0 = p  # the originating parameters
-
       Z0 = substrate.db( p=p0, DS="lbm.finalize" )
-      Z0i = as.matrix( round( cbind( 
-        ( Z0$plon-p0$plons[1])/p0$pres + 1, (Z0$plat-p0$plats[1])/p0$pres + 1
-      ) ) ) 
+      Z0i = array_map( "xy->2", Z0[, c("plon", "plat")], 
+        corner=c(p0$plons[1], p0$plats[1]), res=c(p0$pres, p0$pres) )
    
       varnames = setdiff( names(Z0), c("plon","plat", "lon", "lat") )  
       #using fields
@@ -270,11 +273,10 @@
            
         if ( p0$spatial.domain != p1$spatial.domain ) {
 
-          Z = expand.grid( plon=p1$plons, plat=p1$plats, KEEP.OUT.ATTRS=FALSE )
-          Zi = as.matrix( round( cbind( 
-            ( Z$plon-p1$plons[1])/p1$pres + 1, (Z$plat-p1$plats[1])/p1$pres + 1
-          ) ) ) 
-     
+          Z = bathymetry.db( p=p1, DS="baseline" )
+          Zi = array_map( "xy->2", Z[, c("plon", "plat")], 
+            corner=c(p1$plons[1], p1$plats[1]), res=c(p1$pres, p1$pres) )
+          
           Z = planar2lonlat( Z, proj.type=p1$internal.crs )
           Z$plon_1 = Z$plon # store original coords
           Z$plat_1 = Z$plat
@@ -306,13 +308,35 @@
 
         Z$plon_1 = Z$plat_1 = Z$lon = Z$lat = NULL
 
+
+
+        # # merge covars into S
+        # sid = lbm::array_map( "xy->1", Z[,c("plon", "plat")], 
+        #   dims=c(p1$nplons, p1$nplats), corner=c(p1$plon[1], p1$plat[1]), res=c(p1$pres, p1$pres) )
+
+        # # trim to match dim of inputs ( bathymetry.db("baseline") )
+        # B = bathymetry.db( p=p1, DS="baseline" )
+        # bid = lbm::array_map( "xy->1", B[,c("plon", "plat")], 
+        #   dims=c(p1$nplons, p1$nplats), corner=c(p1$plon[1], p1$plat[1]), res=c(p1$pres, p1$pres) )
+
+        # u = match( bid, sid )
+        # S = Z[u, ]
+        S=Z
+
         fn = file.path( project.datadirectory("bio.substrate", "interpolated"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
-        save (Z, file=fn, compress=TRUE)
+        save (S, file=fn, compress=TRUE)
       }
 
+      if(0){
+        datarange = quantile( S$log.substrate.grainsize, probs=c(0.01, 0.99), na.rm=TRUE )
+        dr = seq( datarange[1], datarange[2], length.out=100)
+        levelplot(log.substrate.grainsize~plon+plat, S,  at=dr, col.regions=(color.code( "seis", dr)))
+
+      }
       return ( "Completed subsets" )
     }
+
 
   }
 
