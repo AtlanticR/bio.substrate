@@ -66,20 +66,11 @@
   p = lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  
   p = lbm( p=p, tasks=c( "save" ) )
 
-  substrate.db( p=p, DS="lbm.finalize.redo" )
-  # B = substrate.db( p=p, DS="lbm.finalize" )
-
  
   # as the interpolation process is so expensive, regrid based off the above run
-  # if you want more, will need to add to the list and modify the selection criteria
-  # this requires "raster" (it is possible to use fields and be a bit faster but this is simpler for now)
-  p$new.grids = c( "canada.east.highres", "canada.east", "SSE", "snowcrab", "SSE.mpa" )
   substrate.db( p=p, DS="complete.redo" )
 
-  # test outputs/ access methods
-  # plot( substrate.db( p, DS="complete", return.format="brick" )$substrate ) # raster brick
-  # spplot( substrate.db( p, DS="complete", return.format="sp" ), "substrate" ) # spatial points/grid data frame
-
+  
 
 
 
