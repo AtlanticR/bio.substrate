@@ -215,7 +215,7 @@
       if (0) {
         # remove land
         oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" ,internal.projection=p$internal.projection)
-        S$[oc,] = NA
+        S[oc,] = NA
         rm(oc); gc()
       }
 
