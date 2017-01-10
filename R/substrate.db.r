@@ -235,7 +235,7 @@
    
       varnames = setdiff( names(S0), c("plon","plat", "lon", "lat") )  
       #using fields
-      grids = setdiff( unique( p0$new.grids ), p0$spatial.domain )
+      grids = setdiff( unique( p0$spatial.domain.subareas ), p0$spatial.domain )
       for (gr in grids ) {
         print(gr)
         p1 = spatial_parameters( type=gr ) #target projection
