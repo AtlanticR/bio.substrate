@@ -47,9 +47,6 @@
     # ---------------------------------------
 
 
-    # ---------------------------------------
-
-
     if ( DS %in% c("lonlat.interpolated", "lonlat.interpolated.redo") ) {
       # interpolation to internal grid
       # locally (internally) force the highest possible resolution to not lose data and extrapolate safely
@@ -190,11 +187,9 @@
           paste( "substrate", "complete", p$spatial.domain, "rdata", sep=".") )
         if ( file.exists ( fn) ) load( fn)
         Snames = names(S)
-        if (is.null(varnames)) {
-          varnames=Snames
-        } else {
-          varnames = intersect( Snames, varnames )
-        }
+        if (is.null(varnames)) varnames=Snames
+        varnames = intersect( Snames, varnames )
+        if (length(varnames) == 0) varnames=Snames  # no match .. send all
         S = S[ , varnames]
         return( S )
       }
@@ -221,6 +216,7 @@
 
       # merge into statistics
       SS = lbm_db( p=p, DS="stats.to.prediction.grid" )
+      names(SS) = paste("s", names(SS), sep=".")
       S = cbind( S, SS )
 
       fn = file.path( project.datadirectory("bio.substrate", "modelled"),
