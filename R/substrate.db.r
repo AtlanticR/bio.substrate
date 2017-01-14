@@ -60,8 +60,8 @@
 
       p$res = "-I10s"  # 10 arc sec -- ie. all data
       p$tension = "-T1" # interpolated but minimally smoothed solutions
-      rlons = range(p$lons)
-      rlats = range(p$lats)
+      rlons = range( c(p$lon0, p$lon1) )
+      rlats = range( c(p$lat0, p$lat1) )
       p$region = paste("-R", rlons[1], "/", rlons[2], "/", rlats[1], "/", rlats[2], sep="")
 
 			names.sub = colnames( substrate )
@@ -94,19 +94,23 @@
         return( substrate )
       }
 
-			ilons = c( p$lons, p$lons[length(p$lons)]+(p$lons[2]-p$lons[1]) )
-      ilats = c( p$lats, p$lats[length(p$lats)]+(p$lats[2]-p$lats[1]) )
+ lons = seq(p$lon0, p$lon1, by=p$dres)
+ lats = seq(p$lat0, p$lat1, by=p$dres)
+
+
+			ilons = c( lons, lons[length(lons)]+(lons[2]-lons[1]) )
+      ilats = c( lats, lats[length(lats)]+(lats[2]-lats[1]) )
 
       substrate = substrate.db( p, DS="lonlat.interpolated" )
-      substrate$lon = as.numeric(as.character(cut(substrate$lon, ilons, include.lowest=T, right=F, labels=p$lons)))
-      substrate$lat = as.numeric(as.character(cut(substrate$lat, ilats, include.lowest=T, right=F, labels=p$lats)))
+      substrate$lon = as.numeric(as.character(cut(substrate$lon, ilons, include.lowest=T, right=F, labels=lons)))
+      substrate$lat = as.numeric(as.character(cut(substrate$lat, ilats, include.lowest=T, right=F, labels=lats)))
 
       gc()
       substrate = block.spatial ( xyz=substrate, function.block=block.mean )
       save( substrate, file=filename.lonlat, compress=T )
 
       gc()
-      substrate = xyz2grid( substrate, p$lons, p$lats)
+      substrate = xyz2grid( substrate, lons, lats)
       save( substrate, file=filename.lonlat.grid, compress=T )
       return ( paste( filename.lonlat.grid, filename.lonlat, sep="\n") )
     }
@@ -131,15 +135,18 @@
       substrate = lonlat2planar( substrate,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
       substrate = substrate[ ,c("plon", "plat", "grainsize" )]
 
-			substrate$plon = grid.internal( substrate$plon, p$plons )
-      substrate$plat = grid.internal( substrate$plat, p$plats )
+      plons = seq(min(p$corners$plon), max(p$corners$plon), by=p$pres)
+      plats = seq(min(p$corners$plat), max(p$corners$plat), by=p$pres)
+
+			substrate$plon = grid.internal( substrate$plon, plons )
+      substrate$plat = grid.internal( substrate$plat, plats )
 
       gc()
       substrate = block.spatial ( xyz=substrate, function.block=block.mean)
       save( substrate, file=filename.planar, compress=T )
 
       gc()
-      substrate = xyz2grid(substrate, p$plons, p$plats)
+      substrate = xyz2grid(substrate, plons, plats)
       save( substrate, file=filename.planar.grid, compress=T )
       return ( paste( filename.planar.grid, filename.planar, sep="\n" ) )
     }
@@ -148,27 +155,25 @@
 
     if ( DS=="lbm.inputs") {
 
-      gridparams = list( dims=c(p$nplons, p$nplats), corner=c(p$plons[1], p$plats[1]), res=c(p$pres, p$pres) )
-
       B = bathymetry.db( p, DS="baseline", varnames=p$varnames )
       B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
 
-      bid = lbm::array_map( "xy->1", B[,c("plon", "plat")], gridparams=gridparams )
+      bid = lbm::array_map( "xy->1", B[,c("plon", "plat")], gridparams=p$gridparams )
 
-      S = substrate.db( p=p, DS="lonlat.highres" ) 
+      S = substrate.db( p=p, DS="lonlat.highres" )
       S = lonlat2planar( S,  proj.type=p$internal.projection )  # utm20, WGS84 (snowcrab geoid)
       S = S[ ,c("plon", "plat", "grainsize" )]
       S$log.substrate.grainsize = log( S$grainsize )
       S$grainsize = NULL
 
       # merge covars into S
-      sid = lbm::array_map( "xy->1", S[,c("plon", "plat")], gridparams=gridparams )
+      sid = lbm::array_map( "xy->1", S[,c("plon", "plat")], gridparams=p$gridparams )
 
       u = match( sid, bid )
       B_matched = B[u, ]
       S = cbind(S, B_matched )
       S = S[ is.finite( rowSums(S) ), ]
-      OUT  = list( LOCS=B[, p$variables$LOCS], COV =B[,  p$variables$COV ] )         
+      OUT  = list( LOCS=B[, p$variables$LOCS], COV =B[, p$variables$COV ] )
 
       return(  list( input=S, output=OUT ) )
 
@@ -198,7 +203,7 @@
       Ssd = lbm_db( p=p, DS="lbm.prediction", ret="sd" )
       S = as.data.frame( cbind( Smean, Ssd) )
       rm (Smean, Ssd); gc()
-      names(S) = c( "log.substrate.grainsize", "log.substrate.grainsize.sd") 
+      names(S) = c( "log.substrate.grainsize", "log.substrate.grainsize.sd")
 
 
       if (0) {
@@ -226,30 +231,28 @@
       p0 = p  # the originating parameters
       S0 = S
       L0 = bathymetry.db( p=p0, DS="baseline" )
-      L0i = array_map( "xy->2", L0, 
-        corner=c(p0$plons[1], p0$plats[1]), res=c(p0$pres, p0$pres) )
-   
-      varnames = setdiff( names(S0), c("plon","plat", "lon", "lat") )  
+      L0i = array_map( "xy->2", L0, gridparams=p0$gridparams )
+
+      varnames = setdiff( names(S0), c("plon","plat", "lon", "lat") )
       #using fields
       grids = setdiff( unique( p0$spatial.domain.subareas ), p0$spatial.domain )
       for (gr in grids ) {
         print(gr)
         p1 = spatial_parameters( type=gr ) #target projection
         L1 = bathymetry.db( p=p1, DS="baseline" )
-        L1i = array_map( "xy->2", L1[, c("plon", "plat")], 
-          corner=c(p1$plons[1], p1$plats[1]), res=c(p1$pres, p1$pres) )
+        L1i = array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
         L1 = planar2lonlat( L1, proj.type=p1$internal.crs )
         S = L1
         L1$plon_1 = L1$plon # store original coords
         L1$plat_1 = L1$plat
         L1 = lonlat2planar( L1, proj.type=p0$internal.crs )
-        p1$wght = fields::setup.image.smooth( 
+        p1$wght = fields::setup.image.smooth(
           nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres,
           theta=p1$pres, xwidth=4*p1$pres, ywidth=4*p1$pres )
         for (vn in varnames) {
           S[[vn]] = spatial_warp( S0[,vn], L0, L1, p0, p1, L0i, L1i )
         }
-    
+
         S = S[ , names(S0) ]
         fn = file.path( project.datadirectory("bio.substrate", "modelled"),
           paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )

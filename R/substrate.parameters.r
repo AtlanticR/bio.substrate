@@ -25,9 +25,9 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
   if (DS=="lbm") {
 
     p$libs = RLibrary( c( p$libs, "lbm" ) ) # required for parallel
-    p$clusters = rep("localhost", detectCores() )
     p$storage.backend="bigmemory.ram"
-    
+    if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
+  
     p$boundary = TRUE 
     p$depth.filter = log(1) # depth is given as log(depth) so, choose andy stats locations with elevation > 1 m as being on land
     p$lbm_nonconvexhull_alpha = 20  # radius in distance units (km) to use for determining boundaries
