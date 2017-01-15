@@ -186,10 +186,11 @@
      #// substrate.db( DS="complete" .. ) returns the final form of the substrate data after
      #// regridding and selection to area of interest as specificied by girds.new=c("SSE", etc)
 
+      outdir = file.path( project.datadirectory("bio.substrate"), "modelled") 
+      fn = file.path( outdir, paste( "substrate", "complete", p$spatial.domain, "rdata", sep=".") )
+
       if ( DS %in% c("complete") ) {
         S = NULL
-        fn = file.path( project.datadirectory("bio.substrate", "modelled"),
-          paste( "substrate", "complete", p$spatial.domain, "rdata", sep=".") )
         if ( file.exists ( fn) ) load( fn)
         Snames = names(S)
         if (is.null(varnames)) varnames=Snames
@@ -224,8 +225,6 @@
       colnames(SS) = paste("s", colnames(SS), sep=".")
       S = cbind( S, SS )
 
-      fn = file.path( project.datadirectory("bio.substrate", "modelled"),
-        paste( "substrate", "complete", p$spatial.domain, "rdata", sep=".") )
       save (S, file=fn, compress=TRUE)
 
       p0 = p  # the originating parameters
@@ -253,8 +252,7 @@
           S[,vn] = spatial_warp( S0[,vn], L0, L1, p0, p1, "fast", L0i, L1i )
         }
         S = S[, names(S0)]
-        fn = file.path( project.datadirectory("bio.substrate", "modelled"),
-          paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
+        fn = file.path( outdir, paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
         save (S, file=fn, compress=TRUE)
       }
 
