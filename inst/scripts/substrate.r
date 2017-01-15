@@ -71,7 +71,9 @@ GCV = 0.79419  Scale est. = 0.79407   n = 713947
   # as the interpolation process is so expensive, regrid based off the above run
   substrate.db( p=p, DS="complete.redo" )
 
-  
+  o = substrate.db( p=p, DS="complete" )
+  b = bathymetry.db(p=p, DS="baseline")
+  lattice::levelplot( o$log.substrate.grainsize ~ plon +plat, data=b, aspect="iso")
 
 
 
