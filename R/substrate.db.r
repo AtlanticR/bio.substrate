@@ -208,7 +208,7 @@
 
       if (0) {
         B = bathymetry.db(p=p, DS="baseline")
-        levelplot( log(S[,1]) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
+        levelplot( (S[,1]) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
         levelplot( log(S[,2]) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
       }
 
@@ -221,7 +221,7 @@
 
       # merge into statistics
       SS = lbm_db( p=p, DS="stats.to.prediction.grid" )
-      names(SS) = paste("s", names(SS), sep=".")
+      colnames(SS) = paste("s", colnames(SS), sep=".")
       S = cbind( S, SS )
 
       fn = file.path( project.datadirectory("bio.substrate", "modelled"),
