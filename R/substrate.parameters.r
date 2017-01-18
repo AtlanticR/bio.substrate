@@ -29,7 +29,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
   
     p$boundary = TRUE 
-    p$depth.filter = log(1) # depth is given as log(depth) so, choose andy stats locations with elevation > 1 m as being on land
+    p$depth.filter = log(1) # the depth covariate is input as log(depth) so, choose andy stats locations with elevation > log(1 m) as being on land
     p$lbm_nonconvexhull_alpha = 20  # radius in distance units (km) to use for determining boundaries
     p$lbm_noise = 0.001  # distance units for eps noise to permit mesh gen for boundaries
     p$lbm_quantile_bounds = c(0.01, 0.99) # remove these extremes in interpolations
@@ -39,10 +39,10 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$lbm_distance_statsgrid = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
     p$lbm_distance_scale = 25 # km ... approx guess of 95% AC range 
     p$lbm_distance_min = p$lbm_distance_statsgrid 
-    p$lbm_distance_max = 60 
+    p$lbm_distance_max = 50 
 
     p$n.min = 100 # n.min/n.max changes with resolution
-    p$n.max = 3000 # numerical time/memory constraint -- anything larger takes too much time .. anything less .. errors
+    p$n.max = 3500 # numerical time/memory constraint -- anything larger takes too much time .. anything less .. errors
     p$sampling = c( 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.5, 1.75, 2 )  # fractions of median distance scale to try in local block search
  
     p$variables = list( Y="log.substrate.grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )
@@ -65,7 +65,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
       # GAM are overly smooth .. adding more knots might be good but speed is the cost .. k=50 to 100 seems to work nicely
       ## data range is from -100 to 5467 m .. 1000 shifts all to positive valued by one order of magnitude
       p$lbm_local_modelformula = formula( 
-        log.substrate.grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") )  
+        log.substrate.grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=200, bs="ts") )  
       p$lbm_local_model_distanceweighted = TRUE  
       p$lbm_gam_optimizer ="perf"
 
@@ -87,8 +87,6 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
 
     }
     
-
-      
     return(p)
   }
 
