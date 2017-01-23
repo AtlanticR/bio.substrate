@@ -213,13 +213,6 @@
         levelplot( log(S[,2]) ~ plon + plat, B, aspect="iso", labels=FALSE, pretty=TRUE, xlab=NULL,ylab=NULL,scales=list(draw=FALSE) )
       }
 
-      if (0) {
-        # remove land
-        oc = landmask( db="worldHires", regions=c("Canada", "US"), return.value="land", tag="predictions" ,internal.projection=p$internal.projection)
-        S[oc,] = NA
-        rm(oc); gc()
-      }
-
       # merge into statistics
       SS = lbm_db( p=p, DS="stats.to.prediction.grid" )
       colnames(SS) = paste("s", colnames(SS), sep=".")

@@ -28,7 +28,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$storage.backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
   
-    p$boundary = TRUE 
+    p$boundary = FALSE 
     p$depth.filter = log(1) # the depth covariate is input as log(depth) so, choose andy stats locations with elevation > log(1 m) as being on land
     p$lbm_nonconvexhull_alpha = 20  # radius in distance units (km) to use for determining boundaries
     p$lbm_noise = 0.001  # distance units for eps noise to permit mesh gen for boundaries
