@@ -12,8 +12,6 @@
   }
 
 
-  
-
   p = bio.substrate::substrate.parameters() # reset to defaults
   p$lbm_local_modelengine = "krige" 
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..

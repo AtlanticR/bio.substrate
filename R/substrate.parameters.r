@@ -15,7 +15,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
                        "geosphere", "geoR", "gstat", "spBayes", "RandomFields", 
                        "sp", "raster", "colorspace" ,  "splancs", "fields" ) )
 
-    p = spatial_parameters( type=resolution, p=p ) # highest resolution still
+    p = spatial_parameters( type=resolution, p=p ) # specified in param default, above ..
     p$spatial.domain.subareas = c( "canada.east.highres", "canada.east", "SSE", "snowcrab", "SSE.mpa" )
   
     return(p)
