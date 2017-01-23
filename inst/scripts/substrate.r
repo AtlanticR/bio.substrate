@@ -67,6 +67,15 @@ GCV = 0.79419  Scale est. = 0.79407   n = 713947
   p = lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
   p = lbm( p=p, tasks=c( "save" ) )
 
+  # to view progress in terminal:
+  # watch -n 120 cat /home/jae/bio.data/bio.substrate/modelled/t/canada.east/lbm_current_status
+
+  # to view maps from an external R session:
+  # lbm(p=p, tasks="debug_pred_static_map", vindex=1)
+  # lbm(p=p, tasks="debug_pred_static_log_map", vindex=1)
+  # lbm(p=p, tasks="debug_pred_dynamic_map", vindex=1)
+  # lbm(p=p, tasks="debug_stats_map", vindex=1)
+
  
   # as the interpolation process is so expensive, regrid based off the above run
   substrate.db( p=p, DS="complete.redo" )
