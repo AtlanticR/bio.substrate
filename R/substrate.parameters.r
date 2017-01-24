@@ -59,7 +59,8 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
 
     
     if ( p$lbm_local_modelengine %in% c("krige" )) { 
-      p$lbm_krige_engine="fields" # faster than gstat
+      
+      # nothing to do ... faster than gstat
 
     } else if (p$lbm_local_modelengine == "gam") {
       # GAM are overly smooth .. adding more knots might be good but speed is the cost .. k=50 to 100 seems to work nicely
