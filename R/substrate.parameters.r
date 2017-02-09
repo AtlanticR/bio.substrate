@@ -47,16 +47,16 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     p$variables = list( Y="log.substrate.grainsize", LOCS=c("plon", "plat"), COV=c("z", "dZ", "ddZ") )
     p$varnames = c( p$variables$LOCS, p$variables$COV ) # to retain fom data sources
 
+    # global model to permit extrapolation ... no space here only in the local model
     p$lbm_global_modelengine = "gam"  # if ==NULL, this means skip global model
     p$lbm_global_modelformula = formula(
-      log.substrate.grainsize ~ s(plon,k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=100, bs="ts") +  s(z, k=3, bs="ts") + s(dZ, k=3, bs="ts" ) + s(ddZ, k=3, bs="ts" ) )
+      log.substrate.grainsize ~  s(z, k=3, bs="ts") + s(dZ, k=3, bs="ts" ) + s(ddZ, k=3, bs="ts" ) )
     p$lbm_global_family = gaussian() #Y-var already log transformed
     p$lbm_local_family = gaussian() # residuals are already log-tranformed so expect gaussian ..
 
     if (!exists("lbm_variogram_method", p)) p$lbm_variogram_method = "fast"
     if (!exists("lbm_local_modelengine", p)) p$lbm_local_modelengine="krige"  # currently the perferred approach 
 
-    
     if ( p$lbm_local_modelengine %in% c("krige" )) { 
       
       # nothing to do ... faster than gstat
@@ -74,7 +74,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
       p$lbm_local_modelformula = formula( log.substrate.grainsize ~ s(plon, bs="ps") + s(plat, bs="ps") + s(plon, plat, bs="te") )  # more detail than "gs" .. "te" is preferred
       p$lbm_local_model_bayesxmethod="MCMC"  # REML actually seems to be the same speed ... i.e., most of the time is spent in thhe prediction step ..
       p$lbm_local_model_distanceweighted = TRUE  
-      p$lbm_local_family_bayesx ="gaussian"
+      p$lbm_local_family ="gaussian"
 
     } else if ( p$lbm_local_modelengine == "fft" ) {
     
