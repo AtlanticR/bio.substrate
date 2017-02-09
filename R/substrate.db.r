@@ -94,8 +94,8 @@
         return( substrate )
       }
 
- lons = seq(p$lon0, p$lon1, by=p$dres)
- lats = seq(p$lat0, p$lat1, by=p$dres)
+     lons = seq(p$lon0, p$lon1, by=p$dres)
+     lats = seq(p$lat0, p$lat1, by=p$dres)
 
 
 			ilons = c( lons, lons[length(lons)]+(lons[2]-lons[1]) )
