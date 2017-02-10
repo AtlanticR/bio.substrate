@@ -22,10 +22,35 @@
   DATA = 'substrate.db( p=p, DS="lbm.inputs" )'
   lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA ) # 30 min
   
-  if (0) {
-    # to summarize just the global model
-    o = lbm_db( p=p, DS="global_model" )
-    summary(o)  
+
+  # DATA='substrate.db( p=p, DS="lbm.inputs" )'
+  # lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
+  lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
+  lbm( p=p, tasks=c( "save" ) )
+
+  # to view progress in terminal:
+  # watch -n 120 cat /home/jae/bio.data/bio.substrate/modelled/t/canada.east/lbm_current_status
+
+  # to view maps from an external R session:
+  # lbm(p=p, tasks="debug_pred_static_map", vindex=1)
+  # lbm(p=p, tasks="debug_pred_static_log_map", vindex=1)
+  # lbm(p=p, tasks="debug_pred_dynamic_map", vindex=1)
+  # lbm(p=p, tasks="debug_stats_map", vindex=1)
+
+ 
+  # as the interpolation process is so expensive, regrid based off the above run
+  substrate.db( p=p, DS="complete.redo" )
+
+  o = substrate.db( p=p, DS="complete" )
+  b = bathymetry.db(p=p, DS="baseline")
+  lattice::levelplot( o$log.substrate.grainsize ~ plon +plat, data=b, aspect="iso")
+
+
+
+# to summarize just the global model
+o = lbm_db( p=p, DS="global_model" )
+summary(o)  
+plot(o)
   
 # Global model results:
 
@@ -57,31 +82,5 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 
 R-sq.(adj) =  0.705   Deviance explained = 70.5%
 GCV = 0.79419  Scale est. = 0.79407   n = 713947
-
-
-  }
-
-  # DATA='substrate.db( p=p, DS="lbm.inputs" )'
-  # lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
-  lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
-  lbm( p=p, tasks=c( "save" ) )
-
-  # to view progress in terminal:
-  # watch -n 120 cat /home/jae/bio.data/bio.substrate/modelled/t/canada.east/lbm_current_status
-
-  # to view maps from an external R session:
-  # lbm(p=p, tasks="debug_pred_static_map", vindex=1)
-  # lbm(p=p, tasks="debug_pred_static_log_map", vindex=1)
-  # lbm(p=p, tasks="debug_pred_dynamic_map", vindex=1)
-  # lbm(p=p, tasks="debug_stats_map", vindex=1)
-
- 
-  # as the interpolation process is so expensive, regrid based off the above run
-  substrate.db( p=p, DS="complete.redo" )
-
-  o = substrate.db( p=p, DS="complete" )
-  b = bathymetry.db(p=p, DS="baseline")
-  lattice::levelplot( o$log.substrate.grainsize ~ plon +plat, data=b, aspect="iso")
-
 
 
