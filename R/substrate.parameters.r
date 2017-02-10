@@ -50,7 +50,7 @@ substrate.parameters = function(DS="bio.substrate", p=NULL, resolution="canada.e
     # global model to permit extrapolation ... no space here only in the local model
     p$lbm_global_modelengine = "gam"  # if ==NULL, this means skip global model
     p$lbm_global_modelformula = formula(
-      log.substrate.grainsize ~  s(z, k=3, bs="ts") + s(dZ, k=3, bs="ts" ) + s(ddZ, k=3, bs="ts" ) + s(b.range, bs="ts") )
+      log.substrate.grainsize ~  s( log(z), k=3, bs="ts") + s( log(dZ), k=3, bs="ts" ) + s( log(ddZ), k=3, bs="ts" ) + s(b.range, bs="ts") )
     
 
     p$lbm_global_family = gaussian() #Y-var already log transformed

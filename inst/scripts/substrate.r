@@ -13,13 +13,14 @@
 
 
   p = bio.substrate::substrate.parameters() # reset to defaults
-  p$lbm_local_modelengine = "krige" 
   p$storage.backend="bigmemory.ram"  # filebacked metods are still too slow ..
+  p$lbm_local_modelengine = "krige" 
+
   p = bio.substrate::substrate.parameters( p=p, DS="lbm" )
   # p$clusters = rep("localhost",  detectCores() )
    
   DATA = 'substrate.db( p=p, DS="lbm.inputs" )'
-  p = lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA ) # 30 min
+  lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA ) # 30 min
   
   if (0) {
     # to summarize just the global model
@@ -61,9 +62,9 @@ GCV = 0.79419  Scale est. = 0.79407   n = 713947
   }
 
   # DATA='substrate.db( p=p, DS="lbm.inputs" )'
-  # p = lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
-  p = lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
-  p = lbm( p=p, tasks=c( "save" ) )
+  # lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
+  lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
+  lbm( p=p, tasks=c( "save" ) )
 
   # to view progress in terminal:
   # watch -n 120 cat /home/jae/bio.data/bio.substrate/modelled/t/canada.east/lbm_current_status
