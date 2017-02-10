@@ -245,6 +245,14 @@
           S[,vn] = spatial_warp( S0[,vn], L0, L1, p0, p1, "fast", L0i, L1i )
         }
         S = S[, names(S0)]
+
+        # range checks
+        ii = which( S$log.substrate.grainsize < -6)
+        if (length(ii) > 0 ) S$log.substrate.grainsize[ii] = -6
+
+        ii = which( S$log.substrate.grainsize > 5 )
+        if (length(ii) > 0 ) S$log.substrate.grainsize[ ii ] = 5
+
         fn = file.path( outdir, paste( "substrate", "complete", p1$spatial.domain, "rdata", sep=".") )
         save (S, file=fn, compress=TRUE)
       }
