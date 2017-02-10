@@ -156,8 +156,10 @@
     if ( DS=="lbm.inputs") {
 
       B = bathymetry.db( p, DS="baseline", varnames=p$varnames )
-      B$z = log( B$z) # ranges  are too large in some cases to use untransformed 2 orders or more (e.g. 40 to 2000 m)
-
+      B$z[ which( B$z < 0.001)]  = 0.001 #
+      B$dZ[ which( B$dZ < 0.001)] = 0.001 # will be log transformed .. range check
+      B$ddZ[ which( B$ddZ < 0.001)] = 0.001
+      
       bid = lbm::array_map( "xy->1", B[,c("plon", "plat")], gridparams=p$gridparams )
 
       S = substrate.db( p=p, DS="lonlat.highres" )
@@ -165,6 +167,7 @@
       S = S[ ,c("plon", "plat", "grainsize" )]
       S$log.substrate.grainsize = log( S$grainsize )
       S$grainsize = NULL
+
 
       # merge covars into S
       sid = lbm::array_map( "xy->1", S[,c("plon", "plat")], gridparams=p$gridparams )
