@@ -20,12 +20,12 @@
   # p$clusters = rep("localhost",  detectCores() )
    
   DATA = 'substrate.db( p=p, DS="lbm.inputs" )'
-  lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA ) # 30 min
+  lbm( p=p, tasks=c("initiate", "globalmodel" ), DATA=DATA ) # 5 min
   
 
   # DATA='substrate.db( p=p, DS="lbm.inputs" )'
   # lbm( p=p, DATA=DATA, tasks=c("initiate", "globalmodel" ) )
-  lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages  .. 3hrs
+  lbm( p=p, tasks=c( "stage1" ) ) # do not need other stages as data density is so high .. 8 hrs
   lbm( p=p, tasks=c( "save" ) )
 
   # to view progress in terminal:
@@ -58,29 +58,27 @@ Family: gaussian
 Link function: identity 
 
 Formula:
-log.substrate.grainsize ~ s(plon, k = 3, bs = "ts") + s(plat, 
-    k = 3, bs = "ts") + s(plon, plat, k = 100, bs = "ts") + s(z, 
-    k = 3, bs = "ts") + s(dZ, k = 3, bs = "ts") + s(ddZ, k = 3, 
-    bs = "ts")
+log.substrate.grainsize ~ s(log(z), k = 3, bs = "ts") + s(log(dZ), 
+    k = 3, bs = "ts") + s(log(ddZ), k = 3, bs = "ts")
 
 Parametric coefficients:
              Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -0.786193   0.001055  -745.5   <2e-16 ***
+(Intercept) -0.786182   0.001686  -466.3   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Approximate significance of smooth terms:
-                edf Ref.df        F p-value    
-s(plon)       2.000      2   9627.1  <2e-16 ***
-s(plat)       2.000      2   3252.9  <2e-16 ***
-s(plon,plat) 97.000     97   7990.3  <2e-16 ***
-s(z)          2.000      2 112281.1  <2e-16 ***
-s(dZ)         1.963      2   1659.5  <2e-16 ***
-s(ddZ)        1.979      2    440.7  <2e-16 ***
+              edf Ref.df        F p-value    
+s(log(z))   2.000      2 114449.8  <2e-16 ***
+s(log(dZ))  1.999      2   2614.3  <2e-16 ***
+s(log(ddZ)) 1.999      2    746.5  <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-R-sq.(adj) =  0.705   Deviance explained = 70.5%
-GCV = 0.79419  Scale est. = 0.79407   n = 713947
+R-sq.(adj) =  0.245   Deviance explained = 24.5%
+GCV = 2.0298  Scale est. = 2.0298    n = 713953
+---
+
+
 
 
